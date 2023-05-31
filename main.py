@@ -185,8 +185,7 @@ def miniwob(opt):
 
                 states, rewards, dones, _ = env.step([miniwob_action])
             except ValueError:
-                llm_agent.cause = "Invalid action or rci action fail"
-                print(llm_agent.cause) #TODO: refacto
+                llm_agent.cause = "Invalid action or rci action fail"  #TODO: refacto that cause variable
                 rewards = [0]
                 dones = [True]
                 break
