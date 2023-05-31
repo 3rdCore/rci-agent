@@ -207,7 +207,7 @@ class LLMAgent:
         loop_num = 0
         while self.check_regex(instruciton):
             if loop_num >= self.rci_limit:
-                print(instruciton)
+                logging.error(instruciton, "Action RCI failed")
                 raise ValueError("Action RCI failed")
 
             pt += self.prompt.rci_action_prompt
