@@ -100,6 +100,14 @@ class LLMAgent:
         else:
             raise NotImplemented
 
+    def save_task(self):
+        with open(self.file_path, "a") as f:
+            f.write("\n")
+            ho_line = "-" * 30 + "INPUT TASK" + "-" * 30 
+            f.write(ho_line)
+            f.write("\n")
+            f.write(self.task)
+
     def save_result(self, result, cause =""):
         with open(self.file_path, "a") as f:
             if result:
@@ -122,7 +130,7 @@ class LLMAgent:
             f.write("\n")
             ho_line = "-" * 30 + "INPUT" + "-" * 30 
             f.write(ho_line)
-            f.write("\n\n")
+            f.write("\n")
             f.write(pt)
             f.write("\n")
 
@@ -133,7 +141,7 @@ class LLMAgent:
             f.write("\n")
             ho_line = "-" * 30 + "OUTPUT" + "-" * 30 
             f.write(ho_line)
-            f.write("\n\n")
+            f.write("\n")
             f.write(response)
             f.write("\n")
 
@@ -142,7 +150,7 @@ class LLMAgent:
     def set_goal(self, goal: str):
         self.custom_gaol = True
         self.task = goal
-
+        self.save_task()
         return
 
     def instruction_history_prompt(self):
