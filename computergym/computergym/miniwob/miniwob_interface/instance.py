@@ -204,7 +204,7 @@ class MiniWoBInstance(Thread):
                 EC.element_to_be_clickable((By.ID, self.SYNC_SCREEN_ID))
             )
         except TimeoutException as e:
-            logging.error("Page did not load properly. Wrong MINIWOB_BASE_URL?")
+            logging.error("Page did not load properly. Wrong MINIWOB_BASE_URL or unknown task ?")
             raise e
         # Seed the seed
         self.driver.execute_script("Math.seedrandom({});".format(self.init_seed))
