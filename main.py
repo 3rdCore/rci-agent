@@ -134,7 +134,9 @@ def get_webdriver(url):
 
 def miniwob(opt):
     env = gym.make("MiniWoBEnv-v0", env_name=opt.env, headless=opt.headless)
-
+    time.sleep(10) #wait for the env to load
+    if any(not instance.is_alive() for instance in env.instances): #TODO understand why its possible to run multiple Gym instances 
+        raise Exception("Environment has crashed : Wrong MINIWOB_BASE_URL or unknown task ?")
     success = 0
     number_of_token_sent_per_episode = []
     number_of_token_received_per_episode = []
