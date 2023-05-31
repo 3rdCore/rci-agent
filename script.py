@@ -4,7 +4,7 @@ import pandas as pd
 
 import main
 
-
+#reading the models and tasks from the json files
 models = ["chatgpt"]
 tasks_filename ="task_names_test.json"
 with open(tasks_filename) as f:
@@ -20,16 +20,17 @@ opt.irci = 3
 opt.sgrounding = True
 opt.headless = True
 
-
+#adding new fields to the opt object
 setattr(opt, "models", models)
 setattr(opt, "task_names", task_names)
 
-#storing the arguments in a json file
+#storing the opt fields in a json file
 with open("arguments.json", "w") as f:
     json.dump(vars(opt), f)
 
 columns = ["model name", "task_name", "success_rate", "min tokens sent", "max tokens sent", "avg tokens sent", "min tokens received", "max tokens received", "avg tokens received", "n LLM calls", "experiment folder"]
 df = pd.DataFrame(columns=columns)
+
 
 for model in models :
     print("Using model : ", model, "\n")
@@ -37,22 +38,21 @@ for model in models :
     for task_name in task_names :
         opt.env = task_name     # switch task
         print("     Task addressed : ", opt.env, "\n")
-        print(opt)
-        result = main.miniwob(opt)
+        result = main.miniwob(opt) #running benchmark
         
+        #storing the latest results in the dataframe
         df.loc[len(df)] = [model, task_name, result["success_rate"], result["min_sent"], result["max_sent"], result["mean_sent"], result["min_received"], result["max_received"], result["mean_received"], result["mean_calls"], result["experiment folder"]]
 
-for model in models :
-    #locate in the dataset, the rows corresponding to the model
-    df_model = df.loc[df["model name"] == model]
-    df_model = df_model.drop("model name", axis=1)
-    
-    filename = "results_"+model+".xlsx"
-    if os.path.exists(filename):
-        os.remove(filename)
-    df_model.to_excel(filename, index=False)
-    
-    filename = "results_"+model+".json"
-    if os.path.exists(filename):
-        os.remove(filename)
-    df_model.to_json(filename)
+        #locate in the dataset, the rows corresponding to the model
+        df_model = df.loc[df["model name"] == model]
+        df_model = df_model.drop("model name", axis=1)
+        
+        filename = "results_"+model+".xlsx"
+        if os.path.exists(filename):
+            os.remove(filename)
+        df_model.to_excel(filename, index=False)
+        
+        filename = "results_"+model+".json"
+        if os.path.exists(filename):
+            os.remove(filename)
+        df_model.to_json(filename)

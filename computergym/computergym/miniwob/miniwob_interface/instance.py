@@ -162,7 +162,7 @@ class MiniWoBInstance(Thread):
             self.index
         )
         options = webdriver.ChromeOptions()
-        chromedriver_path  ="/usr/local/bin/chromedriver"
+        chromedriver_path_WSL  ="/usr/local/bin/chromedriver"
         if self.headless:
             options.add_argument("headless")
             options.add_argument("disable-gpu")
@@ -177,8 +177,10 @@ class MiniWoBInstance(Thread):
                     9000, 30 + self.index * (self.window_height + 30)
                 )
             )
+        
+        #overwrite default chrome driver path for WSL
         if "WSL_DISTRO_NAME" in os.environ:
-            self.driver = webdriver.Chrome(chromedriver_path, chrome_options=options)
+            self.driver = webdriver.Chrome(chromedriver_path_WSL, chrome_options=options)
         else :
             self.driver = webdriver.Chrome(chrome_options=options)
 
