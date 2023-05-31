@@ -48,5 +48,6 @@ dist/**
 *.xlf
 package.nls.*.json
 l10n/
-*.json
+config.json
 *.xlsx
+computergym/**/*.json
