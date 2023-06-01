@@ -2,6 +2,14 @@ import json
 from prompt import Prompt
 import time
 import openai
+from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import (
+    HumanMessage,
+    SystemMessage,
+    AIMessage
+)
+
 from pathlib import Path
 from selenium.webdriver.common.keys import Keys
 import os
@@ -50,7 +58,7 @@ class LLMAgent:
         self.llm = llm
         self.prompt = Prompt(env=env)
         self.state_grounding = state_grounding
-
+        self.api_key = ""
         self.load_model()
         self.number_of_token_sent = 0
         self.number_of_token_received = 0
@@ -80,7 +88,7 @@ class LLMAgent:
     def load_model(self):
         with open("config.json") as config_file:
             api_key = json.load(config_file)["api_key"]
-            openai.api_key = api_key
+            self.api_key = api_key
         if self.llm == "chatgpt":
             self.model = "gpt-3.5-turbo"
         elif self.llm == "gpt4":
@@ -292,48 +300,38 @@ class LLMAgent:
 
         while True:
             try:
-                if self.llm == "chatgpt" or self.llm == "gpt4":
-                    time.sleep(1)
-                    response = openai.ChatCompletion.create(
-                        model=self.model,
-                        temperature=0,
-                        top_p=1,
-                        frequency_penalty=0.0,
-                        presence_penalty=0.0,
-                        max_tokens=256,
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": "You are an autoregressive language model that completes user's sentences. You should not conversate with user.",
-                            },
-                            {"role": "user", "content": pt},
-                        ],
-                    )
+                time.sleep(1)
 
-                    message = response["choices"][0]["message"]["content"]
-                else:
-                    time.sleep(1)
-                    response = openai.Completion.create(
-                        model=self.model,
-                        prompt=pt,
-                        temperature=0,
-                        max_tokens=256,
-                        top_p=1,
-                        frequency_penalty=0.0,
-                        presence_penalty=0.0,
-                    )
-                    message = response["choices"][0]["text"]
+                params = {
+                    "temperature": 0,
+                    "max_tokens": 256
+                }
+                open_ai_params = {
+                    "top_p": 1,
+                    "frequency_penalty": 0.0,
+                    "presence_penalty": 0.0,
+                }
+                
+                openai = ChatOpenAI(model_name="gpt-3.5-turbo", **params, model_kwargs=open_ai_params, openai_api_key = self.api_key)
+
+                messages = [
+                    SystemMessage(content = "You are an autoregressive language model that completes user's sentences. You should not conversate with user."),
+                    HumanMessage(content = pt)
+                ]
+
+                response = openai(messages).content
+
             except Exception as e:
                 print(e)
                 if "maximum context" in str(e):
                     raise ValueError
                 time.sleep(10)
             else:
-                if message:
+                if response:
                     break
         
-        self.number_of_token_received += count_tokens(message, model=self.llm)
-        return message
+        self.number_of_token_received += count_tokens(response, model=self.llm)
+        return response
 
     def generate_action(self) -> str:
         pt = self.prompt.base_prompt
