@@ -124,7 +124,8 @@ class LLMAgent:
                     f"{self.history_name}_success.txt"
                 )
             else:
-                f.write("\n\nFAIL, reason :"+ cause +"\n\n")
+
+                f.write("\n\nFAIL, reason :", cause ,"\n\n")
                 new_file_path = self.file_path.with_name(
                     f"{self.history_name}_fail.txt"
                 )
