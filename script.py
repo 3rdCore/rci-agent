@@ -48,7 +48,7 @@ def save_model_results(df, model):
 
 #reading the models and tasks from the json files
 model_filename ="model_names.json"
-tasks_filename ="task_names_test.json"
+tasks_filename ="task_names.json"
 
 with open(model_filename) as f:
     models = json.load(f)["model_name"]
@@ -64,7 +64,7 @@ if os.path.exists("logs.txt"):
 columns = ["model name", "task_name", "success_rate", "min tokens sent", "max tokens sent", "avg tokens sent", "min tokens received", "max tokens received", "avg tokens received", "n LLM calls", "estimated cost", "experiment folder"]
 df = pd.DataFrame(columns=columns)
 
-budget = 10 #budget in dollars
+budget = 50 #budget in dollars
 remaining_budget = budget
 flag = False
 
