@@ -61,8 +61,7 @@ def web(opt, url):
         logging.info(f"The number of generated action steps: {step}")
         for _ in range(step):
             instruction = llm_agent.generate_action()
-            print(instruction)
-
+            logging.info(f"Instruction: {instruction}")
             perform_instruction(driver, instruction)
 
             html_body = get_html_state_from_real(driver, opt)
@@ -174,7 +173,6 @@ def miniwob(opt):
             step = opt.step
 
         logging.info(f"The number of generated action steps: {step}")
-
         for _ in range(step):
             assert len(states) == 1
             try:
@@ -183,7 +181,7 @@ def miniwob(opt):
 
                 miniwob_action = llm_agent.convert_to_miniwob_action(instruction)
 
-                states, rewards, dones, _ = env.step([miniwob_action])
+                states, rewards, dones, info = env.step([miniwob_action])
             except ValueError:
                 llm_agent.cause = "Invalid action or rci action fail"  #TODO: refacto that cause variable
                 rewards = [0]
@@ -203,7 +201,7 @@ def miniwob(opt):
             success += 1
             llm_agent.save_result(True)
         else:
-            llm_agent.save_result(False, cause=llm_agent.cause)
+            llm_agent.save_result(False, cause = info['n'][0]['reason'])
         
         number_of_token_sent_per_episode.append(llm_agent.number_of_token_sent)
         number_of_token_received_per_episode.append(llm_agent.number_of_token_received)
