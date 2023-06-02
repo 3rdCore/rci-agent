@@ -51,3 +51,6 @@ l10n/
 config.json
 *.xlsx
 computergym/**/*.json
+results_*.json
+logs.txt
+test_*
