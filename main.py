@@ -230,7 +230,7 @@ def miniwob(opt):
         "max_received": max(number_of_token_received_per_episode),
         "mean_received": sum(number_of_token_received_per_episode) / len(number_of_token_received_per_episode),
         "mean_calls": sum(number_of_calls_per_episode) / len(number_of_calls_per_episode),
-        "time": sun(time_taken_per_episode) / len(time_taken_per_episode),
+        "time": sum(time_taken_per_episode) / len(time_taken_per_episode),
         "cost" :  sum(number_of_token_sent_per_episode)/1000*opt.prompt_token_price +  sum(number_of_token_received_per_episode)/1000*opt.completion_token_price, #hardcoded chatgpt price
         "experiment folder" : exp_path
     }
