@@ -158,6 +158,17 @@ class LLMAgent:
 
         return
 
+    def save_action(self, response):
+        with open(self.file_path, "a") as f:
+            f.write("\n")
+            ho_line = "-" * 30 + "Action" + "-" * 30 
+            f.write(ho_line)
+            f.write("\n")
+            f.write(response)
+            f.write("\n")
+
+        return
+
     def set_goal(self, goal: str):
         self.custom_gaol = True
         self.task = goal
