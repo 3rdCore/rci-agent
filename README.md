@@ -42,7 +42,7 @@ If you don't have a browser installed, we recommend Google Chrome or Chromium. Y
 sudo apt-get install google-chrome-stable
 ```
 
-Once that's done, you need to write your OpenAI API key in the `example_config.json` file, then rename the file to `config.json`. 
+Once that's done, you need to write your OpenAI API key in the `example/example_config.json` file, then rename the file to `config.json`. 
 
 ### Run
 To run the code, simply execute the following command:
@@ -91,7 +91,7 @@ In order to run the benchmark, you need to create 2 json files :
 - `task_names.json`, `{"task_name": ["task1", "task2", ...]}` : List of task to run.
 - `model_names.json`, `{"model_name": ["model1", "model2", ...]}` : list of LLM to evaluate (gpt4, chatgpt, davinci, ada, ...)
 
-Or you can also use the provided template and rename them accordingly. You can modify the hyperparameters directly in the file `script.py` and set the maximum Openai budget for the benchmark.
+Or you can also use the provided template in `/example`and rename them accordingly. You can modify the hyperparameters directly in the file `script.py` and set the maximum Openai budget for the benchmark.
 
 Finally, you need to run the following command:
 ```python
