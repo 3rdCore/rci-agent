@@ -54,3 +54,5 @@ computergym/**/*.json
 results_*.json
 logs.txt
 test_*
+docker/*
+arguments.json
