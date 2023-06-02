@@ -140,12 +140,16 @@ def miniwob(opt):
     number_of_token_sent_per_episode = []
     number_of_token_received_per_episode = []
     number_of_calls_per_episode = []
+    time_taken_per_episode = []
+
     config_string = (
         f"state_{opt.sgrounding}-erci_{opt.erci}-irci_{opt.irci}"
     )
     exp_path = f"history/"+ opt.llm + "/" + opt.env +  "/" + config_string + "/" + time.strftime("%Y%m%d-%H%M%S")
 
     for _ in range(opt.num_episodes):
+        #measure time taken 
+        start_time = time.time()
 
         llm_agent = LLMAgent(
             opt.env,
@@ -182,8 +186,10 @@ def miniwob(opt):
                 miniwob_action = llm_agent.convert_to_miniwob_action(instruction)
 
                 states, rewards, dones, info = env.step([miniwob_action])
+                llm_agent.save_action(str(miniwob_action))
             except ValueError:
                 llm_agent.cause = "Invalid action or rci action fail"  #TODO: refacto that cause variable
+                llm_agent.save_action("Invalid action or rci action fail")
                 rewards = [0]
                 dones = [True]
                 break
@@ -203,10 +209,12 @@ def miniwob(opt):
         else:
             llm_agent.save_result(False, cause = info['n'][0]['reason'])
         
+        #time in second
+
         number_of_token_sent_per_episode.append(llm_agent.number_of_token_sent)
         number_of_token_received_per_episode.append(llm_agent.number_of_token_received)
         number_of_calls_per_episode.append(llm_agent.number_of_calls)
-    
+        time_taken_per_episode.append(time.time() - start_time)
     assert len(number_of_token_sent_per_episode) == opt.num_episodes
 
     success_rate = success / opt.num_episodes
@@ -222,6 +230,7 @@ def miniwob(opt):
         "max_received": max(number_of_token_received_per_episode),
         "mean_received": sum(number_of_token_received_per_episode) / len(number_of_token_received_per_episode),
         "mean_calls": sum(number_of_calls_per_episode) / len(number_of_calls_per_episode),
+        "time": sun(time_taken_per_episode) / len(time_taken_per_episode),
         "cost" :  sum(number_of_token_sent_per_episode)/1000*opt.prompt_token_price +  sum(number_of_token_received_per_episode)/1000*opt.completion_token_price, #hardcoded chatgpt price
         "experiment folder" : exp_path
     }

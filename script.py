@@ -47,8 +47,8 @@ def save_model_results(df, model):
     df_model.to_json(filename)
 
 #reading the models and tasks from the json files
-model_filename ="model_names.json"
-tasks_filename ="task_names.json"
+model_filename = "model_names.json"
+tasks_filename = "task_names.json"
 
 with open(model_filename) as f:
     models = json.load(f)["model_name"]
@@ -61,7 +61,7 @@ opt = create_opt(models, task_names)
 if os.path.exists("logs.txt"):
     os.remove("logs.txt")
 
-columns = ["model name", "task_name", "success_rate", "min tokens sent", "max tokens sent", "avg tokens sent", "min tokens received", "max tokens received", "avg tokens received", "n LLM calls", "estimated cost", "experiment folder"]
+columns = ["model name", "task_name", "success_rate", "min tokens sent", "max tokens sent", "avg tokens sent", "min tokens received", "max tokens received", "avg tokens received", "n LLM calls", "time", "estimated cost", "experiment folder"]
 df = pd.DataFrame(columns=columns)
 
 budget = 50 #budget in dollars
@@ -81,7 +81,7 @@ for model in tqdm(models, desc="Models") if not flag else [] :
                 raise Exception("Budget exhausted")
             result = main.miniwob(opt) #running benchmark
             #storing the latest results in the dataframe
-            df.loc[len(df)] = [model, task_name, result["success_rate"], result["min_sent"], result["max_sent"], result["mean_sent"], result["min_received"], result["max_received"], result["mean_received"], result["mean_calls"], result["cost"], result["experiment folder"]]
+            df.loc[len(df)] = [model, task_name, result["success_rate"], result["min_sent"], result["max_sent"], result["mean_sent"], result["min_received"], result["max_received"], result["mean_received"], result["mean_calls"], result["time"], result["cost"], result["experiment folder"]]
             #updating the budget
             remaining_budget -= result["cost"]
 
