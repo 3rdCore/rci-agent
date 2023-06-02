@@ -98,6 +98,8 @@ Finally, you need to run the following command:
 python script.py
 ```
 
+FOr each model, the benchmark results are savec in `results_<model> .xlsx` and `results_<model>.csv`.
+For each task, the history of inputs/outputs of the LLM are stored in the folder `/history`.
 ## Check out our paper! 
 
 Our paper is available on [Arxiv](https://arxiv.org/abs/2303.17491v1). If you use this code in your research, we kindly ask that you cite our paper.
