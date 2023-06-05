@@ -5,7 +5,7 @@ from tqdm import tqdm
 import logging
 
 # deactivate logging
-logging.basicConfig(level=logging.CRITICAL)
+#logging.basicConfig(level=logging.CRITICAL)
 
 import main
 
@@ -20,7 +20,7 @@ def create_opt(models, task_names):
     opt.prompt_token_price = 0.002
     opt.completion_token_price = 0.002
     opt.sgrounding = True
-    opt.headless = True
+    opt.headless = False
 
     #adding new fields to the opt object
     setattr(opt, "models", models)
@@ -48,7 +48,7 @@ def save_model_results(df, model):
 
 #reading the models and tasks from the json files
 model_filename = "model_names.json"
-tasks_filename = "task_names.json"
+tasks_filename = "task_names_example.json"
 
 with open(model_filename) as f:
     models = json.load(f)["model_name"]
@@ -89,6 +89,8 @@ for model in tqdm(models, desc="Models") if not flag else [] :
             with open("logs.txt", "a") as f:
                 f.write("error in the task : "+task_name+" , exception : "+str(e)+"\n")
             
+            df.loc[len(df)] = [model, task_name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "error"]
+
         save_model_results(df, model) #saving the results of the model in a json and excel file
 
 with open("logs.txt", "a") as f:

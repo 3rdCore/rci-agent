@@ -30,7 +30,7 @@ def parse_opt():
     parser.add_argument("--step", type=int, default=-1)
     parser.add_argument("--irci", type=int, default=1)
     parser.add_argument("--sgrounding", action="store_true", default=False)
-    parser.add_argument("--headless", action="store_true", default=True)
+    parser.add_argument("--headless", action="store_true", default=False)
 
     opt = parser.parse_args()
 
@@ -259,4 +259,5 @@ if __name__ == "__main__":
         url = "https://www.facebook.com/"
         web(opt, url)
     else:
+        print(opt.headless)
         miniwob(opt)
