@@ -141,7 +141,6 @@ def miniwob(opt):
     number_of_token_received_per_episode = []
     number_of_calls_per_episode = []
     time_taken_per_episode = []
-
     config_string = (
         f"state_{opt.sgrounding}-erci_{opt.erci}-irci_{opt.irci}"
     )
@@ -149,6 +148,7 @@ def miniwob(opt):
 
     for _ in range(opt.num_episodes):
         #measure time taken 
+        info = ""
         start_time = time.time()
 
         llm_agent = LLMAgent(
@@ -168,7 +168,8 @@ def miniwob(opt):
 
         try:
             llm_agent.initialize_plan()
-        except:
+        except Exception as e:
+            llm_agent.save_error( str(e) + "\n") 
             continue
 
         if opt.step == -1:
@@ -185,11 +186,11 @@ def miniwob(opt):
 
                 miniwob_action = llm_agent.convert_to_miniwob_action(instruction)
 
-                states, rewards, dones, info = env.step([miniwob_action])
+                states, rewards, dones, _ = env.step([miniwob_action])
                 llm_agent.save_action(str(miniwob_action))
-            except ValueError:
-                llm_agent.cause = "Invalid action or rci action fail"  #TODO: refacto that cause variable
-                llm_agent.save_action("Invalid action or rci action fail")
+            except Exception as e:
+                info += str(e) + "\n"
+                llm_agent.save_action(str(e))
                 rewards = [0]
                 dones = [True]
                 break
@@ -207,14 +208,14 @@ def miniwob(opt):
             success += 1
             llm_agent.save_result(True)
         else:
-            llm_agent.save_result(False, cause = info['n'][0]['reason'])
+            llm_agent.save_result(False, cause = info)
         
-        #time in second
 
         number_of_token_sent_per_episode.append(llm_agent.number_of_token_sent)
         number_of_token_received_per_episode.append(llm_agent.number_of_token_received)
         number_of_calls_per_episode.append(llm_agent.number_of_calls)
         time_taken_per_episode.append(time.time() - start_time)
+
     assert len(number_of_token_sent_per_episode) == opt.num_episodes
 
     success_rate = success / opt.num_episodes

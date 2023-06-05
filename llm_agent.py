@@ -70,7 +70,6 @@ class LLMAgent:
         self.past_plan = []
         self.past_instruction = []
         self.custom_gaol = False
-        self.cause = ""
         self.exp_path = exp_path
 
         self.history_name = time.strftime("%Y%m%d-%H%M%S")
@@ -125,8 +124,9 @@ class LLMAgent:
                 )
             else:
 
-                f.write("\n\nFAIL, reason :")
-                f.write(str(cause))
+                f.write("\n\nFAIL")
+                if cause != "":
+                    f.write("reason :" + str(cause))
                 f.write("\n\n")
                 new_file_path = self.file_path.with_name(
                     f"{self.history_name}_fail.txt"
@@ -158,10 +158,24 @@ class LLMAgent:
 
         return
 
+    def save_error(self, response):
+        with open(self.file_path, "a") as f:
+            f.write("\n")
+            ho_line = "-" * 30 + "ERROR" + "-" * 30 
+            f.write(ho_line)
+            f.write("\n")
+            f.write(response)
+            f.write("\n")
+            new_file_path = self.file_path.with_name(
+                f"{self.history_name}_error.txt"
+            )
+            os.rename(self.file_path, new_file_path)
+        return
+
     def save_action(self, response):
         with open(self.file_path, "a") as f:
             f.write("\n")
-            ho_line = "-" * 30 + "Action" + "-" * 30 
+            ho_line = "-" * 30 + "ACTION" + "-" * 30 
             f.write(ho_line)
             f.write("\n")
             f.write(response)
@@ -288,8 +302,12 @@ class LLMAgent:
         pt += self.prompt.init_plan_prompt
         
         self.save_message(pt)
-        message = "\n" + self.get_response(pt)
-        self.save_response(message)
+        try :
+            message = "\n" + self.get_response(pt)
+            self.save_response(message)
+        except Exception as e:
+            self.save_response(str(e))
+            raise e
 
         pt += message
 
@@ -338,7 +356,7 @@ class LLMAgent:
             except Exception as e:
                 print(e)
                 if "maximum context" in str(e):
-                    raise ValueError
+                    raise ValueError(str(e))
                 time.sleep(10)
             else:
                 if response:
