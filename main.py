@@ -31,7 +31,8 @@ def parse_opt():
     parser.add_argument("--irci", type=int, default=1)
     parser.add_argument("--sgrounding", action="store_true", default=False)
     parser.add_argument("--headless", action="store_true", default=False)
-
+    parser.add_argument("--prompt-token-price", type=float, default=0.002)
+    parser.add_argument("--completion-token-price", type=float, default=0.002)
     opt = parser.parse_args()
 
     return opt
