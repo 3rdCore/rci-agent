@@ -120,7 +120,7 @@ def perform_instruction(driver, instruction):
 
 def get_webdriver(url):
     options = webdriver.ChromeOptions()
-    # options.add_argument("headless")
+    options.add_argument("--headless=new")
     options.add_argument("disable-gpu")
     options.add_argument("no-sandbox")
 
@@ -154,7 +154,6 @@ def miniwob(opt):
         logging.info(f"Episode: {_}" +"\n")
         
         #measure time taken 
-        info = ""
         start_time = time.time()
 
         llm_agent = LLMAgent(
@@ -199,7 +198,6 @@ def miniwob(opt):
                 llm_agent.save_action(str(miniwob_action))
             except Exception as e:
                 logging.error(f"Error: {e}")
-                info += str(e) + "\n"
                 llm_agent.save_action(str(e))
                 rewards = [0]
                 dones = [True]
@@ -218,7 +216,7 @@ def miniwob(opt):
             success += 1
             llm_agent.save_result(True)
         else:
-            llm_agent.save_result(False, cause = info)
+            llm_agent.save_result(False)
         
 
         number_of_token_sent_per_episode.append(llm_agent.number_of_token_sent)
@@ -230,7 +228,7 @@ def miniwob(opt):
     env.close()
 
     success_rate = success / opt.num_episodes
-    logging.basicConfig(level=logging.INFO, force = True)
+    logging.basicConfig(level=logging.INFO, force = True) #re-map the logger to the console
     logging.info(f"success rate: {success_rate}")
 
 
