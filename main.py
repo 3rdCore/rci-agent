@@ -1,11 +1,12 @@
 import argparse
 import random
 import time
-
+import os
 
 import computergym
 import gym
 from llm_agent import LLMAgent
+from tqdm import tqdm
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -18,7 +19,6 @@ urllib3.disable_warnings() # disable http warning when closing env
 import warnings
 warnings.filterwarnings("ignore") #remove Userwarning
 
-logging.basicConfig(level=logging.INFO)
 
 
 def parse_opt():
@@ -59,7 +59,7 @@ def web(opt, url):
         llm_agent.initialize_plan()
 
         step = llm_agent.get_plan_step()
-        logging.info(f"The number of generated action steps: {step}")
+        logging.info(f"The number of generated action steps: {step}"+"\n")
         for _ in range(step):
             instruction = llm_agent.generate_action()
             logging.info(f"Instruction: {instruction}")
@@ -111,8 +111,10 @@ def perform_instruction(driver, instruction):
             chain.send_keys(" ")
             chain.perform()
         else:
+            logging.error(f"Invalid key type: {key_type}")
             raise NotImplemented
     else:
+        logging.error(f"Invalid instruction: {instruction}")
         raise ValueError("Invalid instruction")
 
 
@@ -146,8 +148,11 @@ def miniwob(opt):
         f"state_{opt.sgrounding}-erci_{opt.erci}-irci_{opt.irci}"
     )
     exp_path = f"history/"+ opt.llm + "/" + opt.env +  "/" + config_string + "/" + time.strftime("%Y%m%d-%H%M%S")
+    
+    for _ in tqdm(range(opt.num_episodes), desc="Episodes", leave=False):
 
-    for _ in range(opt.num_episodes):
+        logging.info(f"Episode: {_}" +"\n")
+        
         #measure time taken 
         info = ""
         start_time = time.time()
@@ -160,11 +165,14 @@ def miniwob(opt):
             state_grounding=opt.sgrounding,
             exp_path = exp_path,
         )
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), str(llm_agent.file_path.parent) , f"{llm_agent.history_name}.log")
+        logging.basicConfig(filename=filename, level= logging.INFO, force=True) #force = true to overwrite any previously defined logger
+        
         # initialize environment
         states = env.reset(seeds=[random.random()], record_screenshots=True)
         llm_agent.set_goal(states[0].utterance)
+        
         html_state = get_html_state(opt, states)
-
         llm_agent.update_html_state(html_state)
 
         try:
@@ -190,6 +198,7 @@ def miniwob(opt):
                 states, rewards, dones, _ = env.step([miniwob_action])
                 llm_agent.save_action(str(miniwob_action))
             except Exception as e:
+                logging.error(f"Error: {e}")
                 info += str(e) + "\n"
                 llm_agent.save_action(str(e))
                 rewards = [0]
@@ -218,10 +227,12 @@ def miniwob(opt):
         time_taken_per_episode.append(time.time() - start_time)
 
     assert len(number_of_token_sent_per_episode) == opt.num_episodes
+    env.close()
 
     success_rate = success / opt.num_episodes
-    print(f"success rate: {success_rate}")
-    env.close()
+    logging.basicConfig(level=logging.INFO, force = True)
+    logging.info(f"success rate: {success_rate}")
+
 
     result_dict = {
         "success_rate": success_rate,
@@ -260,5 +271,4 @@ if __name__ == "__main__":
         url = "https://www.facebook.com/"
         web(opt, url)
     else:
-        print(opt.headless)
         miniwob(opt)
