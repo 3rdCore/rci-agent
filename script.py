@@ -1,14 +1,12 @@
 import json
 import os
+import sys
 import pandas as pd
 from tqdm import tqdm
 import logging
 
-# deactivate logging
-#logging.basicConfig(level=logging.CRITICAL)
 
 import main
-
 def create_opt(models, task_names):
     opt = main.parse_opt()
     opt.llm = None
@@ -58,8 +56,8 @@ with open(tasks_filename) as f:
 #creating the opt object
 opt = create_opt(models, task_names)
 
-if os.path.exists("logs.txt"):
-    os.remove("logs.txt")
+if os.path.exists("error_logs.txt"):
+    os.remove("error_logs.txt")
 
 columns = ["model name", "task_name", "success_rate", "min tokens sent", "max tokens sent", "avg tokens sent", "min tokens received", "max tokens received", "avg tokens received", "n LLM calls", "time", "estimated cost", "experiment folder"]
 df = pd.DataFrame(columns=columns)
@@ -86,12 +84,11 @@ for model in tqdm(models, desc="Models") if not flag else [] :
             remaining_budget -= result["cost"]
 
         except Exception as e:
-            with open("logs.txt", "a") as f:
-                f.write("error in the task : "+task_name+" , exception : "+str(e)+"\n")
+            with open("error_logs.txt", "a") as f:
+                f.write("error in the task : "+ task_name +" , exception : "+str(e)+"\n")
             
             df.loc[len(df)] = [model, task_name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "error"]
 
         save_model_results(df, model) #saving the results of the model in a json and excel file
 
-with open("logs.txt", "a") as f:
-    f.write("\n" + "total cost : " + str(budget-remaining_budget))
+logging.info("total cost : " + str(budget-remaining_budget))
