@@ -242,9 +242,11 @@ class LLMAgent:
 
         loop_num = 0
         while self.check_regex(instruciton):
+            logging.info(f"instruciton not valid, RCI_action loop number : {loop_num + 1}")
+
             if loop_num >= self.rci_limit:
-                logging.error(instruciton, "Action RCI failed")
-                raise ValueError("Action RCI failed")
+                logging.error("Instruction doesnt match the regex")
+                raise ValueError("Instruction doesnt match the regex")
 
             pt += self.prompt.rci_action_prompt
             self.save_message(pt)
@@ -306,7 +308,7 @@ class LLMAgent:
             message = "\n" + self.get_response(pt)
             self.save_response(message)
         except Exception as e:
-            self.save_response(str(e))
+            self.save_error(str(e))
             raise e
 
         pt += message
@@ -325,6 +327,13 @@ class LLMAgent:
         logging.info(
             f"Send a request to the language model from {inspect.stack()[1].function}"
         )
+        #save
+        with open(self.file_path, "a") as f:
+            f.write("\n")
+            f.write( "-" * 30 + "LOGGING" + "-" * 30)
+            f.write("\n")
+            f.write(f"Send a request to the language model from {inspect.stack()[1].function}")
+        
         #increment number of calls to the API
         self.number_of_calls += 1
         #store number of tokens sent to the API
@@ -344,7 +353,7 @@ class LLMAgent:
                     "presence_penalty": 0.0,
                 }
                 
-                openai = ChatOpenAI(model_name="gpt-3.5-turbo", **params, model_kwargs=open_ai_params, openai_api_key = self.api_key)
+                openai = ChatOpenAI(model_name=self.model, **params, model_kwargs=open_ai_params, openai_api_key = self.api_key)
 
                 messages = [
                     SystemMessage(content = "You are an autoregressive language model that completes user's sentences. You should not conversate with user."),
@@ -354,9 +363,9 @@ class LLMAgent:
                 response = openai(messages).content
 
             except Exception as e:
-                print(e)
+                logging.error("OpenAI related error :", str(e))
                 if "maximum context" in str(e):
-                    raise ValueError(str(e))
+                    raise ValueError(str(e))        #This is the only case for which we want to raise an error otherwise the model just loop until OpenAI respond.
                 time.sleep(10)
             else:
                 if response:
@@ -464,6 +473,7 @@ class LLMAgent:
             elif key_type == "arrowdown":
                 return MiniWoBType(Keys.DOWN)
             else:
+                logging.error(f"Invalid key type : {key_type}")
                 raise NotImplemented
         elif inst_type == "movemouse":
             xpath = " ".join(instruction[1:])
@@ -475,5 +485,6 @@ class LLMAgent:
             xpath = " ".join(instruction[1:])
             return MiniWoBElementClickOption(xpath)
         else:
+            logging.error(f"Invalid instruction type : {inst_type}")
             raise ValueError("Invalid instruction")
             
