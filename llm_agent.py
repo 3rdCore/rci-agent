@@ -339,7 +339,7 @@ class LLMAgent:
         #store number of tokens sent to the API
         self.number_of_token_sent += count_tokens(pt, model=self.llm)
 
-        while True:
+        while True: #loop until we get a response from the API
             try:
                 time.sleep(1)
 
