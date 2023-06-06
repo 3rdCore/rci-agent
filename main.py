@@ -245,7 +245,7 @@ def miniwob(opt):
         "mean_calls": sum(number_of_calls_per_episode) / len(number_of_calls_per_episode),
         "time": sum(time_taken_per_episode) / len(time_taken_per_episode),
         "cost" :  sum(number_of_token_sent_per_episode)/1000*opt.prompt_token_price +  sum(number_of_token_received_per_episode)/1000*opt.completion_token_price, #hardcoded chatgpt price
-        "experiment folder" : exp_path
+        "experiment folder" : str(llm_agent.file_path.parent)
     }
 
     return result_dict
