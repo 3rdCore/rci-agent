@@ -212,6 +212,8 @@ def miniwob(opt):
             html_state = get_html_state(opt, states)
             llm_agent.update_html_state(html_state)
 
+        llm_agent.writer.write_explanation()  #explanations written at the end of each episode because the dictionary is filled during the episode
+
         if rewards[0] > 0:
             success += 1
             llm_agent.save_result(True)

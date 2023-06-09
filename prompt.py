@@ -55,3 +55,14 @@ class Prompt:
         base_prompt = base_prompt.replace("{movemouse}", self.movemouse_regex)
 
         return base_prompt
+
+    def get_reverse_dict(self):
+        prompt_texts = {}
+
+        for attr_name in dir(self):
+            attr_value = getattr(self, attr_name)
+            if isinstance(attr_value, str) and len(attr_value) > 0:
+                prompt_texts[attr_value] = "["+attr_name.upper()+"]" 
+
+        return prompt_texts
+
