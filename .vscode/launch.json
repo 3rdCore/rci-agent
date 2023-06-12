@@ -4,6 +4,18 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
+        {
+            "name": "Python: Debug Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "/home/thirdcore/rci-agent/",
+            "env": "RCI-agent-WSL",
+            "args": []
+        },
         {
             "name": "Python : debug main.py",
             "type": "python",
@@ -32,7 +44,7 @@
             "program": "/home/thirdcore/rci-agent/script.py",
             "console": "integratedTerminal",
             "cwd": "/home/thirdcore/rci-agent/",
-            "env": {},
+            "env": "RCI-agent-WSL",
             "envFile": "${workspaceFolder}/.env",
             "args": []
         }
