@@ -4,11 +4,7 @@ import time
 import openai
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import (
-    HumanMessage,
-    SystemMessage,
-    AIMessage
-)
+from langchain.schema import HumanMessage, SystemMessage, AIMessage
 import difflib
 from bs4 import BeautifulSoup
 
@@ -27,9 +23,9 @@ from computergym.miniwob.miniwob_interface.action import (
 )
 import re
 
+
 # using tiktoken tokenizer to evaluate the number of token sent and received from OpenAI api
 def count_tokens(text, model):
-
     model_map = {
         "chatgpt": "gpt-3.5-turbo",
         "gpt4": "gpt-4",
@@ -38,16 +34,17 @@ def count_tokens(text, model):
         "babbage": "babbage",
         "curie": "curie",
         "davinci1": "davinci",
-        "davinci2": "text-davinci-002"
+        "davinci2": "text-davinci-002",
     }
 
     enc = tiktoken.encoding_for_model(model_map.get(model))
     return len(enc.encode(text))
 
-def get_html_code(input) : 
+
+def get_html_code(input):
     """
     Parses the given input string to, retrieve the HTML code block using BeautifulSoup.
-    When extracting the html code from the input string, BS also rearrange the tag attributes order, which is an undesired behavior that makes it difficult to replace the html code with rearranged attributes from the non-modified input string. For this reason, we overwrite the input string with the BS-processed input string. 
+    When extracting the html code from the input string, BS also rearrange the tag attributes order, which is an undesired behavior that makes it difficult to replace the html code with rearranged attributes from the non-modified input string. For this reason, we overwrite the input string with the BS-processed input string.
     Args:
         input (str): The input string to parse.
 
@@ -56,10 +53,10 @@ def get_html_code(input) :
         - The input string with any HTML code replaced by a placeholder string.
         - The largest HTML tag found in the input string, as a string.
     """
-    
+
     # Parse the HTML code using BeautifulSoup
-    soup = BeautifulSoup(input, 'html.parser')
-    # Find all HTML tags in the soup    
+    soup = BeautifulSoup(input, "html.parser")
+    # Find all HTML tags in the soup
     tags = soup.find_all()
 
     # Find the largest HTML tag
@@ -67,28 +64,28 @@ def get_html_code(input) :
     largest_length = 0
 
     for tag in tags:
-        
         length = len(str(tag))
         if length > largest_length:
             largest_length = length
             largest_tag = tag
 
     # Print the largest HTML tag
-    return(str(soup), str(largest_tag))
+    return (str(soup), str(largest_tag))
 
 
 class TextFileWriter:
-    """ A class for writing text to a log_file with HTML code and reccurent paragraph detection and replacement.
+    """A class for writing text to a log_file with HTML code and reccurent paragraph detection and replacement.
     Attributes:
     file_path (str): The path to the file to write to.
     prompt (Prompt): The Prompt object used to retrieve the human-crafted prompts.
 
     Methods:
         write(pt): Writes the given text to the file, replacing any recurrent paragraphs in the reverse_dict with their according placeholder.
-        Also detects and replaces the full HTML code with the placeholder [HTML_CODE] and the difference between the previous and the current HTML in the github PR format. 
+        Also detects and replaces the full HTML code with the placeholder [HTML_CODE] and the difference between the previous and the current HTML in the github PR format.
 
         write_explanation(): Writes an explanation of the Prompt object and the reverse_dict to the file, followed by the existing content of the file.
     """
+
     def __init__(self, file_path, prompt):
         """
         Initializes a TextFileWriter object with the given file path and Prompt object.
@@ -104,28 +101,39 @@ class TextFileWriter:
     def write(self, pt):
         """
         Writes the given text to the log file, replacing any recurrent paragraphs in the reverse_dict with their according placeholder.
-        Also detects and replaces the full HTML code with the placeholder [HTML_CODE] and the difference between the previous and the current HTML in the github PR format. 
+        Also detects and replaces the full HTML code with the placeholder [HTML_CODE] and the difference between the previous and the current HTML in the github PR format.
 
         Args:
             pt (str): The text to write to the file.
         """
-        #retrieve value if pt in self.reverse_dict
+        # retrieve value if pt in self.reverse_dict
         for key in self.reverse_dict.keys():
             if key in pt:
                 pt = pt.replace(key, self.reverse_dict[key])
-        
+
         pt, match = get_html_code(pt)
-        if match != "None" :
+        if match != "None":
             if len(self.html_state) > 0:
-                diff = difflib.unified_diff(self.html_state.splitlines(), match.splitlines(), lineterm="", fromfile='old', tofile='new')
-                diff_str = '\n'.join(list(diff))
+                diff = difflib.unified_diff(
+                    self.html_state.splitlines(),
+                    match.splitlines(),
+                    lineterm="",
+                    fromfile="old",
+                    tofile="new",
+                )
+                diff_str = "\n".join(list(diff))
                 if len(diff_str) > 0:
-                    pt = pt.replace(match, "[HTML CODE]"+"\n"+ "Here is the difference between the previous HTML state and the current HTML state: \n"+diff_str)
-                else :
+                    pt = pt.replace(
+                        match,
+                        "[HTML CODE]"
+                        + "\n"
+                        + "Here is the difference between the previous HTML state and the current HTML state: \n"
+                        + diff_str,
+                    )
+                else:
                     pt = pt.replace(match, "[HTML CODE]")
 
             self.html_state = match
-
 
         with open(self.file_path, "a") as f:
             f.write(pt)
@@ -138,10 +146,10 @@ class TextFileWriter:
         with open("logging_prompt.txt", "r") as f:
             explanation_prompt = f.read()
 
-        #open self.file_path and and text from the top : 
+        # open self.file_path and and text from the top :
         with open(self.file_path, "r") as f:
             existing_content = f.read()
-        
+
         with open(self.file_path, "w") as f:
             f.write(explanation_prompt)
             json.dump(self.reverse_dict, f)
@@ -181,16 +189,16 @@ class LLMAgent:
         self.history_name = time.strftime("%Y%m%d-%H%M%S")
 
         if self.prompt.example_prompt:
-            self.file_path = Path(
-                f"{self.exp_path}/few-shot/{self.history_name}.txt"
-            )
+            self.file_path = Path(f"{self.exp_path}/few-shot/{self.history_name}.txt")
         else:
-            self.file_path = Path(
-                f"{self.exp_path}/zero-shot/{self.history_name}.txt"
-            )
+            self.file_path = Path(f"{self.exp_path}/zero-shot/{self.history_name}.txt")
         self.file_path.parent.mkdir(parents=True, exist_ok=True)
 
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), str(self.file_path.parent) , f"{self.history_name}_compressed.txt")
+        filename = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            str(self.file_path.parent),
+            f"{self.history_name}_compressed.txt",
+        )
         self.writer = TextFileWriter(filename, self.prompt)
 
     def load_model(self):
@@ -224,13 +232,13 @@ class LLMAgent:
         Saves the task in the log file.
         """
         with open(self.file_path, "a") as f:
-            pt = "\n"+ "-" * 30 + "INPUT TASK" + "-" * 30 +"\n"
+            pt = "\n" + "-" * 30 + "INPUT TASK" + "-" * 30 + "\n"
             pt += self.task
             f.write(pt)
 
         self.writer.write(pt)
 
-    def save_result(self, result, cause =""):
+    def save_result(self, result, cause=""):
         with open(self.file_path, "a") as f:
             if result:
                 pt = "\n\nSUCCESS\n\n"
@@ -260,7 +268,7 @@ class LLMAgent:
         Saves the message (input of the LLM) in the log file.
         """
         with open(self.file_path, "a") as f:
-            pt = "\n"+ "-" * 30 + "INPUT" + "-" * 30 +"\n" + pt + "\n"
+            pt = "\n" + "-" * 30 + "INPUT" + "-" * 30 + "\n" + pt + "\n"
             f.write(pt)
 
         self.writer.write(pt)
@@ -272,7 +280,7 @@ class LLMAgent:
         Saves the response (output of the LLM) in the log file.
         """
         with open(self.file_path, "a") as f:
-            pt = "\n"+ "-" * 30 + "OUTPUT" + "-" * 30 +"\n" + response + "\n"
+            pt = "\n" + "-" * 30 + "OUTPUT" + "-" * 30 + "\n" + response + "\n"
             f.write(pt)
 
         self.writer.write(pt)
@@ -284,14 +292,12 @@ class LLMAgent:
         Saves the error (output of the LLM) in the log file in case the main thread of the benchmark crashes.
         """
         with open(self.file_path, "a") as f:
-            pt = "\n"+ "-" * 30 + "INPUT" + "-" * 30 +"\n" + response + "\n"
+            pt = "\n" + "-" * 30 + "INPUT" + "-" * 30 + "\n" + response + "\n"
             f.write(pt)
 
-            new_file_path = self.file_path.with_name(
-                f"{self.history_name}_error.txt"
-            )
+            new_file_path = self.file_path.with_name(f"{self.history_name}_error.txt")
             os.rename(self.file_path, new_file_path)
-        
+
         self.writer.write(pt)
 
         return
@@ -301,7 +307,7 @@ class LLMAgent:
         Saves the selenium-compatible action (processed output of the LLM) executed on the environment in the log file.
         """
         with open(self.file_path, "a") as f:
-            pt = "\n"+ "-" * 30 + "ACTION" + "-" * 30 +"\n" + response + "\n"
+            pt = "\n" + "-" * 30 + "ACTION" + "-" * 30 + "\n" + response + "\n"
             f.write(pt)
 
         self.writer.write(pt)
@@ -353,7 +359,9 @@ class LLMAgent:
     def rci_plan(self, pt=None):
         pt += "\n\nFind problems with this plan for the given task compared to the example plans.\n\n"
         self.save_message(pt)
-        self.writer.reverse_dict['Find problems with this plan for the given task compared to the example plans.'] = "[FIND PROBLEMS]"
+        self.writer.reverse_dict[
+            "Find problems with this plan for the given task compared to the example plans."
+        ] = "[FIND PROBLEMS]"
         criticizm = self.get_response(pt)
         self.save_response(criticizm)
         pt += criticizm
@@ -361,7 +369,9 @@ class LLMAgent:
         pt += "\n\nBased on this, what is the plan for the agent to complete the task?\n\n"
         # pt += self.webpage_state_prompt()
         self.save_message(pt)
-        self.writer.reverse_dict['Based on this, what is the plan for the agent to complete the task?'] = "[WHAT IS THE PLAN]"
+        self.writer.reverse_dict[
+            "Based on this, what is the plan for the agent to complete the task?"
+        ] = "[WHAT IS THE PLAN]"
 
         plan = self.get_response(pt)
         self.save_response(plan)
@@ -372,7 +382,9 @@ class LLMAgent:
 
         loop_num = 0
         while self.check_regex(instruciton):
-            logging.info(f"instruciton not valid, RCI_action loop number : {loop_num + 1}")
+            logging.info(
+                f"instruciton not valid, RCI_action loop number : {loop_num + 1}"
+            )
 
             if loop_num >= self.rci_limit:
                 logging.error("Instruction doesnt match the regex")
@@ -382,7 +394,6 @@ class LLMAgent:
             self.save_message(pt)
             instruciton = self.get_response(pt)
             self.save_response(instruciton)
-
 
             pt += instruciton
             instruciton = self.process_instruction(instruciton)
@@ -432,9 +443,9 @@ class LLMAgent:
         pt = self.prompt.base_prompt
         pt += self.webpage_state_prompt(True, with_task=self.with_task)
         pt += self.prompt.init_plan_prompt
-        
+
         self.save_message(pt)
-        try :
+        try:
             message = "\n" + self.get_response(pt)
             self.writer.reverse_dict[message] = "[INIT PLAN]"
             self.save_response(message)
@@ -458,37 +469,43 @@ class LLMAgent:
         logging.info(
             f"Send a request to the language model from {inspect.stack()[1].function}"
         )
-        #save
+        # save
         with open(self.file_path, "a") as f:
             f.write("\n")
-            f.write( "-" * 30 + "LOGGING" + "-" * 30)
+            f.write("-" * 30 + "LOGGING" + "-" * 30)
             f.write("\n")
-            f.write(f"Send a request to the language model from {inspect.stack()[1].function}")
-        
-        #increment number of calls to the API
+            f.write(
+                f"Send a request to the language model from {inspect.stack()[1].function}"
+            )
+
+        # increment number of calls to the API
         self.number_of_calls += 1
-        #store number of tokens sent to the API
+        # store number of tokens sent to the API
         self.number_of_token_sent += count_tokens(pt, model=self.llm)
 
-        while True: #loop until we get a response from the API
+        while True:  # loop until we get a response from the API
             try:
                 time.sleep(1)
 
-                params = {
-                    "temperature": 0,
-                    "max_tokens": 256
-                }
+                params = {"temperature": 0, "max_tokens": 256}
                 open_ai_params = {
                     "top_p": 1,
                     "frequency_penalty": 0.0,
                     "presence_penalty": 0.0,
                 }
-                
-                openai = ChatOpenAI(model_name=self.model, **params, model_kwargs=open_ai_params, openai_api_key = self.api_key)
+
+                openai = ChatOpenAI(
+                    model_name=self.model,
+                    **params,
+                    model_kwargs=open_ai_params,
+                    openai_api_key=self.api_key,
+                )
 
                 messages = [
-                    SystemMessage(content = "You are an autoregressive language model that completes user's sentences. You should not conversate with user."),
-                    HumanMessage(content = pt)
+                    SystemMessage(
+                        content="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
+                    ),
+                    HumanMessage(content=pt),
                 ]
 
                 response = openai(messages).content
@@ -496,12 +513,14 @@ class LLMAgent:
             except Exception as e:
                 logging.error("OpenAI related error :", str(e))
                 if "maximum context" in str(e):
-                    raise ValueError(str(e))        #This is the only case for which we want to raise an error otherwise the model just loop until OpenAI respond.
+                    raise ValueError(
+                        str(e)
+                    )  # This is the only case for which we want to raise an error otherwise the model just loop until OpenAI respond.
                 time.sleep(10)
             else:
                 if response:
                     break
-        
+
         self.number_of_token_received += count_tokens(response, model=self.llm)
         return response
 
@@ -558,12 +577,11 @@ class LLMAgent:
     def update_action(self, pt=None, message=None):
         if self.prompt.update_action and self.state_grounding:
             pt += self.prompt.update_action
-            
+
             self.save_message(pt)
             message = self.get_response(pt)
             self.save_response(message)
             pt += message
-
 
         return pt, message
 
@@ -618,4 +636,3 @@ class LLMAgent:
         else:
             logging.error(f"Invalid instruction type : {inst_type}")
             raise ValueError("Invalid instruction")
-            

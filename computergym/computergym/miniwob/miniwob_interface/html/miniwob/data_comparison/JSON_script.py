@@ -1,6 +1,8 @@
 import os
 import json
-#curent directory
+
+# curent directory
+
 
 def get_task_name():
     folder_path = os.path.dirname(os.path.realpath(__file__))
@@ -10,14 +12,15 @@ def get_task_name():
         # Check if the file is an HTML file
         if file_name.endswith(".html"):
             # Add the file name to the list of HTML files
-            #remove the html extension 
+            # remove the html extension
             file_name = file_name[:-5]
             html_files.append(file_name)
     # Create a dictionary with the HTML files
     html_dict = {"html_files": html_files}
     # Save the dictionary to a JSON file
     with open("task_names.json", "w") as f:
-        json.dump(html_dict, f,indent=2)
+        json.dump(html_dict, f, indent=2)
+
 
 def get_task_name_by_folder():
     # Create an empty list to store the folder names
@@ -35,8 +38,8 @@ def get_task_name_by_folder():
     with open("task_names.json", "w") as f:
         json.dump(folder_dict, f, indent=2)
 
-def get_JSON_intersect(file1,file2):
 
+def get_JSON_intersect(file1, file2):
     # Load the first JSON file into a dictionary
     with open(file1, "r") as f:
         data1 = json.load(f)
@@ -51,15 +54,15 @@ def get_JSON_intersect(file1,file2):
     # Print the intersection of the values
     print(f"The intersection of the values is: {intersection}")
 
-    #save intersection to json file
+    # save intersection to json file
     html_dict = {"html_files": list(intersection)}
 
     # Save the dictionary to a JSON file
     with open("task_intersect.json", "w") as f:
-        json.dump(html_dict, f,indent=2)
+        json.dump(html_dict, f, indent=2)
 
-def get_JSON_diff(file1,file2):
-    
+
+def get_JSON_diff(file1, file2):
     # Load the first JSON file into a dictionary
     with open(file1, "r") as f:
         data1 = json.load(f)
@@ -68,8 +71,8 @@ def get_JSON_diff(file1,file2):
         data2 = json.load(f)
     # Find the intersection of the values in the dictionaries
     diff = set(data1["task_name"]) - set(data2["task_name"])
-    #save intersection to json file
+    # save intersection to json file
     html_dict = {"task_name": list(diff)}
     # Save the dictionary to a JSON file
     with open("task_diff.json", "w") as f:
-        json.dump(html_dict, f,indent=2)
+        json.dump(html_dict, f, indent=2)

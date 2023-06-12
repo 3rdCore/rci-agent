@@ -62,7 +62,6 @@ class Prompt:
         for attr_name in dir(self):
             attr_value = getattr(self, attr_name)
             if isinstance(attr_value, str) and len(attr_value) > 0:
-                prompt_texts[attr_value] = "["+attr_name.upper()+"]" 
+                prompt_texts[attr_value] = "[" + attr_name.upper() + "]"
 
         return prompt_texts
-

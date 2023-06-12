@@ -162,7 +162,7 @@ class MiniWoBInstance(Thread):
             self.index
         )
         options = webdriver.ChromeOptions()
-        chromedriver_path_WSL  ="/usr/local/bin/chromedriver"
+        chromedriver_path_WSL = "/usr/local/bin/chromedriver"
         if self.headless:
             options.add_argument("--headless=new")
             options.add_argument("disable-gpu")
@@ -177,11 +177,13 @@ class MiniWoBInstance(Thread):
                     9000, 30 + self.index * (self.window_height + 30)
                 )
             )
-        
-        #overwrite default chrome driver path for WSL
+
+        # overwrite default chrome driver path for WSL
         if "WSL_DISTRO_NAME" in os.environ:
-            self.driver = webdriver.Chrome(chromedriver_path_WSL, chrome_options=options)
-        else :
+            self.driver = webdriver.Chrome(
+                chromedriver_path_WSL, chrome_options=options
+            )
+        else:
             self.driver = webdriver.Chrome(chrome_options=options)
 
         self.driver.implicitly_wait(5)
@@ -204,7 +206,9 @@ class MiniWoBInstance(Thread):
                 EC.element_to_be_clickable((By.ID, self.SYNC_SCREEN_ID))
             )
         except TimeoutException as e:
-            logging.error("Page did not load properly. Wrong MINIWOB_BASE_URL or unknown task ?")
+            logging.error(
+                "Page did not load properly. Wrong MINIWOB_BASE_URL or unknown task ?"
+            )
             raise e
         # Seed the seed
         self.driver.execute_script("Math.seedrandom({});".format(self.init_seed))

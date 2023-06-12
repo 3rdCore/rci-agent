@@ -15,10 +15,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 import logging
 
 import urllib3
-urllib3.disable_warnings() # disable http warning when closing env
-import warnings
-warnings.filterwarnings("ignore") #remove Userwarning
 
+urllib3.disable_warnings()  # disable http warning when closing env
+import warnings
+
+warnings.filterwarnings("ignore")  # remove Userwarning
 
 
 def parse_opt():
@@ -59,7 +60,7 @@ def web(opt, url):
         llm_agent.initialize_plan()
 
         step = llm_agent.get_plan_step()
-        logging.info(f"The number of generated action steps: {step}"+"\n")
+        logging.info(f"The number of generated action steps: {step}" + "\n")
         for _ in range(step):
             instruction = llm_agent.generate_action()
             logging.info(f"Instruction: {instruction}")
@@ -136,24 +137,34 @@ def get_webdriver(url):
 
 def miniwob(opt):
     env = gym.make("MiniWoBEnv-v0", env_name=opt.env, headless=opt.headless)
-    time.sleep(10) #wait for the env to load
-    if any(not instance.is_alive() for instance in env.instances): #TODO understand why its possible to run multiple Gym instances 
-        raise Exception("Environment has crashed : Wrong MINIWOB_BASE_URL or unknown task ?")
+    time.sleep(10)  # wait for the env to load
+    if any(
+        not instance.is_alive() for instance in env.instances
+    ):  # TODO understand why its possible to run multiple Gym instances
+        raise Exception(
+            "Environment has crashed : Wrong MINIWOB_BASE_URL or unknown task ?"
+        )
     success = 0
     number_of_token_sent_per_episode = []
     number_of_token_received_per_episode = []
     number_of_calls_per_episode = []
     time_taken_per_episode = []
-    config_string = (
-        f"state_{opt.sgrounding}-erci_{opt.erci}-irci_{opt.irci}"
+    config_string = f"state_{opt.sgrounding}-erci_{opt.erci}-irci_{opt.irci}"
+    exp_path = (
+        f"history/"
+        + opt.llm
+        + "/"
+        + opt.env
+        + "/"
+        + config_string
+        + "/"
+        + time.strftime("%Y%m%d-%H%M%S")
     )
-    exp_path = f"history/"+ opt.llm + "/" + opt.env +  "/" + config_string + "/" + time.strftime("%Y%m%d-%H%M%S")
-    
-    for _ in tqdm(range(opt.num_episodes), desc="Episodes", leave=False):
 
-        logging.info(f"Episode: {_}" +"\n")
-        
-        #measure time taken 
+    for _ in tqdm(range(opt.num_episodes), desc="Episodes", leave=False):
+        logging.info(f"Episode: {_}" + "\n")
+
+        # measure time taken
         start_time = time.time()
 
         llm_agent = LLMAgent(
@@ -162,22 +173,28 @@ def miniwob(opt):
             rci_limit=opt.irci,
             llm=opt.llm,
             state_grounding=opt.sgrounding,
-            exp_path = exp_path,
+            exp_path=exp_path,
         )
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), str(llm_agent.file_path.parent) , f"{llm_agent.history_name}.log")
-        logging.basicConfig(filename=filename, level= logging.INFO, force=True) #force = true to overwrite any previously defined logger
-        
+        filename = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            str(llm_agent.file_path.parent),
+            f"{llm_agent.history_name}.log",
+        )
+        logging.basicConfig(
+            filename=filename, level=logging.INFO, force=True
+        )  # force = true to overwrite any previously defined logger
+
         # initialize environment
         states = env.reset(seeds=[random.random()], record_screenshots=True)
         llm_agent.set_goal(states[0].utterance)
-        
+
         html_state = get_html_state(opt, states)
         llm_agent.update_html_state(html_state)
 
         try:
             llm_agent.initialize_plan()
         except Exception as e:
-            llm_agent.save_error( str(e) + "\n") 
+            llm_agent.save_error(str(e) + "\n")
             continue
 
         if opt.step == -1:
@@ -212,14 +229,13 @@ def miniwob(opt):
             html_state = get_html_state(opt, states)
             llm_agent.update_html_state(html_state)
 
-        llm_agent.writer.write_explanation()  #explanations written at the end of each episode because the dictionary is filled during the episode
+        llm_agent.writer.write_explanation()  # explanations written at the end of each episode because the dictionary is filled during the episode
 
         if rewards[0] > 0:
             success += 1
             llm_agent.save_result(True)
         else:
             llm_agent.save_result(False)
-        
 
         number_of_token_sent_per_episode.append(llm_agent.number_of_token_sent)
         number_of_token_received_per_episode.append(llm_agent.number_of_token_received)
@@ -230,22 +246,29 @@ def miniwob(opt):
     env.close()
 
     success_rate = success / opt.num_episodes
-    logging.basicConfig(level=logging.INFO, force = True) #re-map the logger to the console
+    logging.basicConfig(
+        level=logging.INFO, force=True
+    )  # re-map the logger to the console
     logging.info(f"success rate: {success_rate}")
-
 
     result_dict = {
         "success_rate": success_rate,
         "min_sent": min(number_of_token_sent_per_episode),
         "max_sent": max(number_of_token_sent_per_episode),
-        "mean_sent": sum(number_of_token_sent_per_episode) / len(number_of_token_sent_per_episode),
+        "mean_sent": sum(number_of_token_sent_per_episode)
+        / len(number_of_token_sent_per_episode),
         "min_received": min(number_of_token_received_per_episode),
         "max_received": max(number_of_token_received_per_episode),
-        "mean_received": sum(number_of_token_received_per_episode) / len(number_of_token_received_per_episode),
-        "mean_calls": sum(number_of_calls_per_episode) / len(number_of_calls_per_episode),
+        "mean_received": sum(number_of_token_received_per_episode)
+        / len(number_of_token_received_per_episode),
+        "mean_calls": sum(number_of_calls_per_episode)
+        / len(number_of_calls_per_episode),
         "time": sum(time_taken_per_episode) / len(time_taken_per_episode),
-        "cost" :  sum(number_of_token_sent_per_episode)/1000*opt.prompt_token_price +  sum(number_of_token_received_per_episode)/1000*opt.completion_token_price, #hardcoded chatgpt price
-        "experiment folder" : str(llm_agent.file_path.parent)
+        "cost": sum(number_of_token_sent_per_episode) / 1000 * opt.prompt_token_price
+        + sum(number_of_token_received_per_episode)
+        / 1000
+        * opt.completion_token_price,  # hardcoded chatgpt price
+        "experiment folder": str(llm_agent.file_path.parent),
     }
 
     return result_dict
