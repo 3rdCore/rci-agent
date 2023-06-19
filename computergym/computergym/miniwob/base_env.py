@@ -130,9 +130,9 @@ class MiniWoBEnv(MiniWoBEnvironment, gym.Env):
 
 
 if __name__ == "__main__":
-    env = MiniWoBEnv("click-pie")
+    env = MiniWoBEnv("click-button")
     for _ in range(1):
-        obs = env.reset(record_screenshots=True)
+        obs = env.reset(record_screenshots=False)
 
         done = [False]
         while not all(done):

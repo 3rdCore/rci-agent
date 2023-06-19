@@ -1,0 +1,7 @@
+gym
+openai
+selenium
+Pillow
+regex
+openpyxl
+tiktoken

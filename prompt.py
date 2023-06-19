@@ -12,8 +12,10 @@ class Prompt:
         self.clickxpath_regex = "^clickxpath\s.{1,}$"
         self.clickoption_regex = "^clickoption\s.{1,}$"
         self.movemouse_regex = "^movemouse\s.{1,}$"
+        if "webshop" in env:
+            base_dir = f"prompt/"  ## put webshop relevant files here
 
-        if os.path.exists(f"prompt/{env}/"):
+        elif os.path.exists(f"prompt/{env}/"):
             base_dir = f"prompt/{env}/"
         else:
             base_dir = f"prompt/"

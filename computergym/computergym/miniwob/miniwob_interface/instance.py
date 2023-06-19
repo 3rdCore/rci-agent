@@ -11,6 +11,7 @@ import os
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -162,6 +163,7 @@ class MiniWoBInstance(Thread):
             self.index
         )
         options = webdriver.ChromeOptions()
+        # service = Service(join(dirname(abspath(__file__)), "chromedriver"))
         chromedriver_path_WSL = "/usr/local/bin/chromedriver"
         if self.headless:
             options.add_argument("--headless=new")
@@ -184,7 +186,7 @@ class MiniWoBInstance(Thread):
                 chromedriver_path_WSL, chrome_options=options
             )
         else:
-            self.driver = webdriver.Chrome(chrome_options=options)
+            self.driver = webdriver.Chrome(options=options)
 
         self.driver.implicitly_wait(5)
 
