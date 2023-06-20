@@ -235,7 +235,6 @@ class LLMAgent:
             pt = "\n" + "-" * 30 + "INPUT TASK" + "-" * 30 + "\n"
             pt += self.task
             f.write(pt)
-            print(pt)
 
         self.writer.write(pt)
 
