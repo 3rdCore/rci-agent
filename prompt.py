@@ -1,9 +1,11 @@
 import os
+import re
 
 
 class Prompt:
     def __init__(self, env: str = "click-button") -> None:
         self.llm = "davinci"
+        self.env = env
         # they're called in the rest of the script - > not needed for webshop though, it won't have any effect on the prompt but avoids using if webshop etc.. whan loading the other parts of the prompt
         self.davinci_type_regex = "^type\s.{1,}$"
         self.chatgpt_type_regex = '^type\s[^"]{1,}$'
@@ -60,7 +62,7 @@ class Prompt:
                     )
                 )
 
-        self.check_regex = check_regex
+        # self.check_regex = check_regex
 
         with open(base_dir + "example.txt") as f:
             self.example_prompt = f.read()
@@ -84,6 +86,19 @@ class Prompt:
 
         with open(base_dir + "update_action.txt") as f:
             self.update_action = f.read()
+
+    def check_regex(self, instruciton):
+        if "webshop" in self.env:
+            return not re.search(self.searchbar_regex, instruciton, flags=re.I)
+        else:
+            return (
+                (not re.search(self.clickxpath_regex, instruciton, flags=re.I))
+                and (not re.search(self.chatgpt_type_regex, instruciton, flags=re.I))
+                and (not re.search(self.davinci_type_regex, instruciton, flags=re.I))
+                and (not re.search(self.press_regex, instruciton, flags=re.I))
+                and (not re.search(self.clickoption_regex, instruciton, flags=re.I))
+                and (not re.search(self.movemouse_regex, instruciton, flags=re.I))
+            )
 
     def replace_regex(self, base_prompt):
         if self.llm == "chatgpt":
