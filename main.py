@@ -203,6 +203,8 @@ def miniwob(opt):
             step = opt.step
 
         logging.info(f"The number of generated action steps: {step}")
+        llm_agent.writer.write(llm_agent.save_logging(f"The number of generated action steps: {step}"))
+        steps_performed = 0
         for _ in range(step):
             assert len(states) == 1
             try:
@@ -228,8 +230,11 @@ def miniwob(opt):
 
             html_state = get_html_state(opt, states)
             llm_agent.update_html_state(html_state)
+            steps_performed += 1
 
         llm_agent.writer.write_explanation()  # explanations written at the end of each episode because the dictionary is filled during the episode
+        if steps_performed == step:
+            llm_agent.writer.write(llm_agent.save_logging("Number of step reach the limit defined by the model."))
 
         if rewards[0] > 0:
             success += 1

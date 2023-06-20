@@ -319,6 +319,7 @@ class LLMAgent:
         with open(self.file_path, "a") as f:
             pt = "\n" + "-" * 30 + "LOGGING" + "-" * 30 + "\n" + response + "\n"
             f.write(pt)
+        return pt
 
     def set_goal(self, goal: str):
         self.custom_gaol = True
@@ -391,7 +392,7 @@ class LLMAgent:
             logging.info(
                 f"instruciton not valid, RCI_action loop number : {loop_num + 1}"
             )
-            self.save_logging(f"instruciton not valid, RCI_action loop number : {loop_num + 1}")
+            self.writer.write(self.save_logging(f"instruciton not valid, RCI_action loop number : {loop_num + 1}"))
 
             if loop_num >= self.rci_limit:
                 logging.error("Too many attemps to get a valid instruction : RCI failed")
@@ -476,7 +477,7 @@ class LLMAgent:
         logging.info(
             f"Send a request to the language model from {inspect.stack()[1].function}"
         )
-        self.save_logging(f"Send a request to the language model from {inspect.stack()[1].function}")
+        self.writer.write(self.save_logging(f"Send a request to the language model from {inspect.stack()[1].function}"))
 
         # increment number of calls to the API
         self.number_of_calls += 1
