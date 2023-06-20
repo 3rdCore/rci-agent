@@ -83,11 +83,14 @@ class WebAgentSiteEnv(gym.Env):
         if action_name == "search":
             try:
                 search_bar = self.browser.find_element_by_id("search_input")
-            except Exception:
-                pass
-            else:
-                search_bar.send_keys(action_arg)
-                search_bar.submit()
+            except (
+                Exception
+            ):  ## added beacuse the previous function is deprecated in newer versions of selenium
+                search_bar = self.browser.find_element(By.ID, "search_input")
+                # pass
+
+            search_bar.send_keys(action_arg)
+            search_bar.submit()
         elif action_name == "click":
             try:
                 self.text_to_clickable[action_arg].click()
@@ -114,7 +117,9 @@ class WebAgentSiteEnv(gym.Env):
             try:
                 search_bar = self.browser.find_element_by_id("search_input")
             except:
-                search_bar = self.browser.find_element(By.ID, "search_input")
+                search_bar = self.browser.find_element(
+                    By.ID, "search_input"
+                )  ##added new version of selenium
         except Exception:
             has_search_bar = False
         else:
@@ -128,11 +133,15 @@ class WebAgentSiteEnv(gym.Env):
                 "input[type='radio']"
             )
         except:
-            buttons = self.browser.find_elements(By.CLASS_NAME, "btn")
-            product_links = self.browser.find_elements(By.CLASS_NAME, "product-link")
+            buttons = self.browser.find_elements(
+                By.CLASS_NAME, "btn"
+            )  ##added new version of selenium
+            product_links = self.browser.find_elements(
+                By.CLASS_NAME, "product-link"
+            )  ##added new version of selenium
             buying_options = self.browser.find_elements(
                 By.CSS_SELECTOR, "input[type='radio']"
-            )
+            )  ##added new version of selenium
 
         self.text_to_clickable = {f"{b.text}": b for b in buttons + product_links}
         for opt in buying_options:
