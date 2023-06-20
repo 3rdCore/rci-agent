@@ -3,4 +3,4 @@ We have an autonomous computer control agent that can perform atomic instruction
 
 first, if a search bar is visible, it can type a text in the search bar and launch the search with the instruction that matches the template "search[text]" where text is a free-form text.
 
-Second, 
+Second, it can click on any clickable element available on the web page with the instruction that matches the template "click[selector]" where selector is an HTML id that uniquely identifies the element.
