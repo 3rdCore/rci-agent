@@ -1,0 +1,6 @@
+
+We have an autonomous computer control agent that can perform atomic instructions specified by natural language to control computers. There are two types of instructions it can execute.
+
+first, if a search bar is visible, it can type a text in the search bar and launch the search with the instruction that matches the template "search[text]" where text is a free-form text.
+
+Second, 
