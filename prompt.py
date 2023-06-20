@@ -16,13 +16,13 @@ class Prompt:
                 base_dir = f"prompt/{env}/"
             else:
                 base_dir = f"prompt/"
-
-            self.davinci_type_regex = "^type\s.{1,}$"
-            self.chatgpt_type_regex = '^type\s[^"]{1,}$'
-            self.press_regex = ("^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$")
-            self.clickxpath_regex = "^clickxpath\s.{1,}$"
-            self.clickoption_regex = "^clickoption\s.{1,}$"
-            self.movemouse_regex = "^movemouse\s.{1,}$"
+        #they're called in the rest of the script - > not needed for webshop though, it won't have any effect on the prompt but avoids using if webshop etc.. whan loading the other parts of the prompt
+        self.davinci_type_regex = "^type\s.{1,}$"
+        self.chatgpt_type_regex = '^type\s[^"]{1,}$'
+        self.press_regex = ("^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$")
+        self.clickxpath_regex = "^clickxpath\s.{1,}$"
+        self.clickoption_regex = "^clickoption\s.{1,}$"
+        self.movemouse_regex = "^movemouse\s.{1,}$"
 
             def check_regex(self, instruciton):  
                 return (
