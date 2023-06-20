@@ -241,7 +241,7 @@ class LLMAgent:
     def save_result(self, result, cause=""):
         with open(self.file_path, "a") as f:
             if result:
-                pt = "\n\nSUCCESS\n\n"
+                pt = "\n\nSUCCESS : reward was obtained\n\n"
                 f.write(pt)
                 new_file_path = self.file_path.with_name(
                     f"{self.history_name}_success.txt"
@@ -249,7 +249,7 @@ class LLMAgent:
                 self.writer.write(pt)
 
             else:
-                pt = "\n\nFAIL"
+                pt = "\n\nFAIL : reward was not obtained."
                 if cause != "":
                     pt += " reason :" + str(cause)
                 pt += "\n\n"
@@ -313,6 +313,12 @@ class LLMAgent:
         self.writer.write(pt)
 
         return
+
+    def save_logging(self, response):
+
+        with open(self.file_path, "a") as f:
+            pt = "\n" + "-" * 30 + "LOGGING" + "-" * 30 + "\n" + response + "\n"
+            f.write(pt)
 
     def set_goal(self, goal: str):
         self.custom_gaol = True
@@ -385,10 +391,11 @@ class LLMAgent:
             logging.info(
                 f"instruciton not valid, RCI_action loop number : {loop_num + 1}"
             )
+            self.save_logging(f"instruciton not valid, RCI_action loop number : {loop_num + 1}")
 
             if loop_num >= self.rci_limit:
-                logging.error("Instruction doesnt match the regex")
-                raise ValueError("Instruction doesnt match the regex")
+                logging.error("Too many attemps to get a valid instruction : RCI failed")
+                raise ValueError("Too many attemps to get a valid instruction : RCI failed")
 
             pt += self.prompt.rci_action_prompt
             self.save_message(pt)
@@ -469,14 +476,7 @@ class LLMAgent:
         logging.info(
             f"Send a request to the language model from {inspect.stack()[1].function}"
         )
-        # save
-        with open(self.file_path, "a") as f:
-            f.write("\n")
-            f.write("-" * 30 + "LOGGING" + "-" * 30)
-            f.write("\n")
-            f.write(
-                f"Send a request to the language model from {inspect.stack()[1].function}"
-            )
+        self.save_logging(f"Send a request to the language model from {inspect.stack()[1].function}")
 
         # increment number of calls to the API
         self.number_of_calls += 1

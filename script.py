@@ -84,7 +84,7 @@ columns = [
 ]
 df = pd.DataFrame(columns=columns)
 
-budget = 50  # budget in dollars
+budget = 40  # budget in dollars
 remaining_budget = budget
 flag = False
 
