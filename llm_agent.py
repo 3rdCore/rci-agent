@@ -382,7 +382,7 @@ class LLMAgent:
         instruciton = self.process_instruction(instruciton)
 
         loop_num = 0
-        while self.check_regex(instruciton):
+        while self.prompt.check_regex(instruciton):
             logging.info(
                 f"instruciton not valid, RCI_action loop number : {loop_num + 1}"
             )
@@ -402,16 +402,6 @@ class LLMAgent:
             loop_num += 1
 
         return pt, instruciton
-
-    def check_regex(self, instruciton):
-        return (
-            (not re.search(self.prompt.clickxpath_regex, instruciton, flags=re.I))
-            and (not re.search(self.prompt.chatgpt_type_regex, instruciton, flags=re.I))
-            and (not re.search(self.prompt.davinci_type_regex, instruciton, flags=re.I))
-            and (not re.search(self.prompt.press_regex, instruciton, flags=re.I))
-            and (not re.search(self.prompt.clickoption_regex, instruciton, flags=re.I))
-            and (not re.search(self.prompt.movemouse_regex, instruciton, flags=re.I))
-        )
 
     def process_instruction(self, instruciton: str):
         end_idx = instruciton.find("`")

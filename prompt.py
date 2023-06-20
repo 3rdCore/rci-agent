@@ -4,21 +4,36 @@ import os
 class Prompt:
     def __init__(self, env: str = "click-button") -> None:
         self.llm = "davinci"
-        self.davinci_type_regex = "^type\s.{1,}$"
-        self.chatgpt_type_regex = '^type\s[^"]{1,}$'
-        self.press_regex = (
-            "^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$"
-        )
-        self.clickxpath_regex = "^clickxpath\s.{1,}$"
-        self.clickoption_regex = "^clickoption\s.{1,}$"
-        self.movemouse_regex = "^movemouse\s.{1,}$"
-        if "webshop" in env:
-            base_dir = f"prompt/"  ## put webshop relevant files here
 
-        elif os.path.exists(f"prompt/{env}/"):
-            base_dir = f"prompt/{env}/"
-        else:
-            base_dir = f"prompt/"
+        if "webshop" in env:
+            base_dir = f"prompt/webshop/"  ## put webshop relevant files here
+            self.searchbar_regex = "(.+)\[(.+)\]"
+            def check_regex(self, instruciton):  
+                return not re.search(self.prompt.searchbar_regex, instruciton, flags=re.I)
+        
+        else :
+            self.davinci_type_regex = "^type\s.{1,}$"
+            self.chatgpt_type_regex = '^type\s[^"]{1,}$'
+            self.press_regex = ("^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$")
+            self.clickxpath_regex = "^clickxpath\s.{1,}$"
+            self.clickoption_regex = "^clickoption\s.{1,}$"
+            self.movemouse_regex = "^movemouse\s.{1,}$"
+
+            def check_regex(self, instruciton):  
+                return (
+                    (not re.search(self.prompt.clickxpath_regex, instruciton, flags=re.I))
+                    and (not re.search(self.prompt.chatgpt_type_regex, instruciton, flags=re.I))
+                    and (not re.search(self.prompt.davinci_type_regex, instruciton, flags=re.I))
+                    and (not re.search(self.prompt.press_regex, instruciton, flags=re.I))
+                    and (not re.search(self.prompt.clickoption_regex, instruciton, flags=re.I))
+                    and (not re.search(self.prompt.movemouse_regex, instruciton, flags=re.I))
+                )
+        self.check_regex = check_regex
+
+            elif os.path.exists(f"prompt/{env}/"):
+                base_dir = f"prompt/{env}/"
+            else:
+                base_dir = f"prompt/"
 
         with open(base_dir + "example.txt") as f:
             self.example_prompt = f.read()
