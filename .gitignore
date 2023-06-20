@@ -56,3 +56,5 @@ logs.txt
 test_*
 docker/*
 arguments.json
+
+.vscode/*
