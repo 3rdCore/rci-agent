@@ -12,6 +12,11 @@ class Prompt:
                 return not re.search(self.prompt.searchbar_regex, instruciton, flags=re.I)
         
         else :
+            if os.path.exists(f"prompt/{env}/"):
+                base_dir = f"prompt/{env}/"
+            else:
+                base_dir = f"prompt/"
+
             self.davinci_type_regex = "^type\s.{1,}$"
             self.chatgpt_type_regex = '^type\s[^"]{1,}$'
             self.press_regex = ("^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$")
@@ -29,11 +34,6 @@ class Prompt:
                     and (not re.search(self.prompt.movemouse_regex, instruciton, flags=re.I))
                 )
         self.check_regex = check_regex
-
-            elif os.path.exists(f"prompt/{env}/"):
-                base_dir = f"prompt/{env}/"
-            else:
-                base_dir = f"prompt/"
 
         with open(base_dir + "example.txt") as f:
             self.example_prompt = f.read()
