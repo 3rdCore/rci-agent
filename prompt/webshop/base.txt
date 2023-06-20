@@ -1,6 +1,9 @@
 
 We have an autonomous computer control agent that can perform atomic instructions specified by natural language to control computers. There are two types of instructions it can execute.
 
-first, if a search bar is visible, it can type a text in the search bar and launch the search with the instruction that matches the template "search[text]" where text is a free-form text.
+First, using the instruction that matches the "search[text]" expression it can look for a specific product in the website. text is a free-form text. This instruction can be executed only if a search bar is visible.
 
-Second, it can click on any clickable element available on the web page with the instruction that matches the template "click[selector]" where selector is an HTML id that uniquely identifies the element.
+Second, using the instruction that matches the "click[selector]" expression, it can click on any clickable element available on the web page. "selector" is an HTML id that uniquely identifies an element present on the web page.
+
+The agent can solve the task by looking for products with keywords and clicking on products, their attributes, to check if they correspond to the task at hand. The agent need to explore the products available and look for the right one. The right product is the one that meet the requirements of the task. The agent can explore the products by clicking on them. Once the agent has found the right product, the agent needs to click on it and buy it. The agent can buy a product by clicking on the buy button.
+The task is succeded once the agent have bought the product that satisfies all the features specified by the task.
