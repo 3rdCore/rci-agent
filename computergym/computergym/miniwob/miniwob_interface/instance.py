@@ -181,10 +181,10 @@ class MiniWoBInstance(Thread):
         # overwrite default chrome driver path for WSL
         if "WSL_DISTRO_NAME" in os.environ:
             self.driver = webdriver.Chrome(
-                chromedriver_path_WSL, chrome_options=options
-            )
+                chromedriver_path_WSL, options=options
+            ) #chrome_options=options for Chrome instead of Chromium
         else:
-            self.driver = webdriver.Chrome(options=options)
+            self.driver = webdriver.Chrome(options=options) #chrome_options=options for Chrome instead of Chromium
 
         self.driver.implicitly_wait(5)
 
