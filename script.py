@@ -33,19 +33,21 @@ def create_opt(models, task_names):
     return opt
 
 
-def save_model_results(df, model):
+def save_model_results(df, model, name = "", path = ""):
     df_model = df.loc[df["model name"] == model]
     df_model = df_model.drop("model name", axis=1)
 
-    filename = "results_" + model + ".xlsx"
-    if os.path.exists(filename):
-        os.remove(filename)
-    df_model.to_excel(filename, index=False)
+    filename = "results_" + model + "_" + name + ".xlsx"
+    file_path = os.path.join(path, filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    df_model.to_excel(file_path, index=False)
 
-    filename = "results_" + model + ".json"
-    if os.path.exists(filename):
-        os.remove(filename)
-    df_model.to_json(filename)
+    filename = "results_" + model + "_" + name + ".json"
+    file_path = os.path.join(path, filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    df_model.to_json(file_path)
 
 
 # manual AZERTY/QWERTY prevention
@@ -55,6 +57,9 @@ def save_model_results(df, model):
 # reading the models and tasks from the json files
 model_filename = "model_names.json"
 tasks_filename = "task_names.json"
+
+name = ""
+results_dir = ""
 
 with open(model_filename) as f:
     models = json.load(f)["model_name"]
@@ -132,7 +137,7 @@ for model in tqdm(models, desc="Models") if not flag else []:
             df.loc[len(df)] = [model, task_name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "error"]
 
         save_model_results(
-            df, model
+            df, model, name, results_dir
         )  # saving the results of the model in a json and excel file
 
 logging.info("total cost : " + str(budget - remaining_budget))
