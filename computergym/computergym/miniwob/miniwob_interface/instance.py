@@ -184,7 +184,7 @@ class MiniWoBInstance(Thread):
                 chromedriver_path_WSL, chrome_options=options
             )
         else:
-            self.driver = webdriver.Chrome(chrome_options=options)
+            self.driver = webdriver.Chrome(options=options)
 
         self.driver.implicitly_wait(5)
 
