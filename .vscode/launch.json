@@ -12,19 +12,17 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "/home/thirdcore/rci-agent/",
-            "env": "RCI-agent-WSL",
+            "cwd": "${workspaceFolder}",
             "args": []
         },
         {
             "name": "Python : debug main.py",
             "type": "python",
             "request": "launch",
-            "program": "/home/thirdcore/rci-agent/main.py",
+            "program": "main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "cwd": "/home/thirdcore/rci-agent/",
-            "env": "RCI-agent-WSL",
+            "cwd": "${workspaceFolder}",
             "args": [
                 "--env",
                 "click-dialog",
@@ -41,11 +39,13 @@
             "name": "Python: script.py ",
             "type": "python",
             "request": "launch",
-            "program": "/home/thirdcore/rci-agent/script.py",
+            "program": "script.py",
             "console": "integratedTerminal",
-            "cwd": "/home/thirdcore/rci-agent/",
-            "env": "RCI-agent-WSL",
+            "cwd": "${workspaceFolder}",
             "envFile": "${workspaceFolder}/.env",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/computergym"
+            },
             "args": []
         }
     ]
