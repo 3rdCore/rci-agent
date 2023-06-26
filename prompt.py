@@ -6,9 +6,7 @@ class Prompt:
         self.llm = "davinci"
         self.davinci_type_regex = "^type\s.{1,}$"
         self.chatgpt_type_regex = '^type\s[^"]{1,}$'
-        self.press_regex = (
-            "^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$"
-        )
+        self.press_regex = "^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$"
         self.clickxpath_regex = "^clickxpath\s.{1,}$"
         self.clickoption_regex = "^clickoption\s.{1,}$"
         self.movemouse_regex = "^movemouse\s.{1,}$"

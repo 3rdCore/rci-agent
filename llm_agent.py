@@ -243,9 +243,7 @@ class LLMAgent:
             if result:
                 pt = "\n\nSUCCESS : reward was obtained\n\n"
                 f.write(pt)
-                new_file_path = self.file_path.with_name(
-                    f"{self.history_name}_success.txt"
-                )
+                new_file_path = self.file_path.with_name(f"{self.history_name}_success.txt")
                 self.writer.write(pt)
 
             else:
@@ -254,9 +252,7 @@ class LLMAgent:
                     pt += " reason :" + str(cause)
                 pt += "\n\n"
                 f.write(pt)
-                new_file_path = self.file_path.with_name(
-                    f"{self.history_name}_fail.txt"
-                )
+                new_file_path = self.file_path.with_name(f"{self.history_name}_fail.txt")
                 self.writer.write(pt)
 
         os.rename(self.file_path, new_file_path)
@@ -315,7 +311,6 @@ class LLMAgent:
         return
 
     def save_logging(self, response):
-
         with open(self.file_path, "a") as f:
             pt = "\n" + "-" * 30 + "LOGGING" + "-" * 30 + "\n" + response + "\n"
             f.write(pt)
@@ -364,7 +359,9 @@ class LLMAgent:
         return
 
     def rci_plan(self, pt=None):
-        pt += "\n\nFind problems with this plan for the given task compared to the example plans.\n\n"
+        pt += (
+            "\n\nFind problems with this plan for the given task compared to the example plans.\n\n"
+        )
         self.save_message(pt)
         self.writer.reverse_dict[
             "Find problems with this plan for the given task compared to the example plans."
@@ -389,10 +386,10 @@ class LLMAgent:
 
         loop_num = 0
         while self.check_regex(instruciton):
-            logging.info(
-                f"instruciton not valid, RCI_action loop number : {loop_num + 1}"
+            logging.info(f"instruciton not valid, RCI_action loop number : {loop_num + 1}")
+            self.writer.write(
+                self.save_logging(f"instruciton not valid, RCI_action loop number : {loop_num + 1}")
             )
-            self.writer.write(self.save_logging(f"instruciton not valid, RCI_action loop number : {loop_num + 1}"))
 
             if loop_num >= self.rci_limit:
                 logging.error("Too many attemps to get a valid instruction : RCI failed")
@@ -474,10 +471,12 @@ class LLMAgent:
     def get_response(self, pt):
         import inspect
 
-        logging.info(
-            f"Send a request to the language model from {inspect.stack()[1].function}"
+        logging.info(f"Send a request to the language model from {inspect.stack()[1].function}")
+        self.writer.write(
+            self.save_logging(
+                f"Send a request to the language model from {inspect.stack()[1].function}"
+            )
         )
-        self.writer.write(self.save_logging(f"Send a request to the language model from {inspect.stack()[1].function}"))
 
         # increment number of calls to the API
         self.number_of_calls += 1
@@ -536,13 +535,9 @@ class LLMAgent:
                 "{prev_inst}", self.past_instruction[-1]
             )
             if len(self.past_instruction) == 1:
-                update_action_prompt = self.prompt.action_prompt.replace(
-                    "{order}", "2nd"
-                )
+                update_action_prompt = self.prompt.action_prompt.replace("{order}", "2nd")
             elif len(self.past_instruction) == 2:
-                update_action_prompt = self.prompt.action_prompt.replace(
-                    "{order}", "3rd"
-                )
+                update_action_prompt = self.prompt.action_prompt.replace("{order}", "3rd")
             else:
                 update_action_prompt = self.prompt.action_prompt.replace(
                     "{order}", f"{len(self.past_instruction)+1}th"
