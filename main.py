@@ -43,9 +43,7 @@ def web(opt, url):
     driver = get_webdriver(url)
 
     while True:
-        llm_agent = LLMAgent(
-            opt.env, rci_plan_loop=opt.erci, rci_limit=opt.irci, llm=opt.llm
-        )
+        llm_agent = LLMAgent(opt.env, rci_plan_loop=opt.erci, rci_limit=opt.irci, llm=opt.llm)
 
         html_body = get_html_state_from_real(driver, opt)
 
@@ -75,9 +73,7 @@ def web(opt, url):
 def get_html_state_from_real(driver, opt):
     if opt.env == "facebook":
         main_html_xpath = '//*[@id="content"]'
-        html_body = driver.find_element(By.XPATH, main_html_xpath).get_attribute(
-            "outerHTML"
-        )
+        html_body = driver.find_element(By.XPATH, main_html_xpath).get_attribute("outerHTML")
     else:
         raise NotImplemented
 
@@ -141,9 +137,7 @@ def miniwob(opt):
     if any(
         not instance.is_alive() for instance in env.instances
     ):  # TODO understand why its possible to run multiple Gym instances
-        raise Exception(
-            "Environment has crashed : Wrong MINIWOB_BASE_URL or unknown task ?"
-        )
+        raise Exception("Environment has crashed : Wrong MINIWOB_BASE_URL or unknown task ?")
     success = 0
     number_of_token_sent_per_episode = []
     number_of_token_received_per_episode = []
@@ -151,7 +145,8 @@ def miniwob(opt):
     time_taken_per_episode = []
     config_string = f"state_{opt.sgrounding}-erci_{opt.erci}-irci_{opt.irci}"
     exp_path = (
-        f"history/"
+        opt.results_dir
+        + "/history/"
         + opt.llm
         + "/"
         + opt.env
@@ -203,7 +198,9 @@ def miniwob(opt):
             step = opt.step
 
         logging.info(f"The number of generated action steps: {step}")
-        llm_agent.writer.write(llm_agent.save_logging(f"The number of generated action steps: {step}"))
+        llm_agent.writer.write(
+            llm_agent.save_logging(f"The number of generated action steps: {step}")
+        )
         steps_performed = 0
         for _ in range(step):
             assert len(states) == 1
@@ -234,7 +231,9 @@ def miniwob(opt):
 
         llm_agent.writer.write_explanation()  # explanations written at the end of each episode because the dictionary is filled during the episode
         if steps_performed == step:
-            llm_agent.writer.write(llm_agent.save_logging("Number of step reach the limit defined by the model."))
+            llm_agent.writer.write(
+                llm_agent.save_logging("Number of step reach the limit defined by the model.")
+            )
 
         if rewards[0] > 0:
             success += 1
@@ -251,23 +250,19 @@ def miniwob(opt):
     env.close()
 
     success_rate = success / opt.num_episodes
-    logging.basicConfig(
-        level=logging.INFO, force=True
-    )  # re-map the logger to the console
+    logging.basicConfig(level=logging.INFO, force=True)  # re-map the logger to the console
     logging.info(f"success rate: {success_rate}")
 
     result_dict = {
         "success_rate": success_rate,
         "min_sent": min(number_of_token_sent_per_episode),
         "max_sent": max(number_of_token_sent_per_episode),
-        "mean_sent": sum(number_of_token_sent_per_episode)
-        / len(number_of_token_sent_per_episode),
+        "mean_sent": sum(number_of_token_sent_per_episode) / len(number_of_token_sent_per_episode),
         "min_received": min(number_of_token_received_per_episode),
         "max_received": max(number_of_token_received_per_episode),
         "mean_received": sum(number_of_token_received_per_episode)
         / len(number_of_token_received_per_episode),
-        "mean_calls": sum(number_of_calls_per_episode)
-        / len(number_of_calls_per_episode),
+        "mean_calls": sum(number_of_calls_per_episode) / len(number_of_calls_per_episode),
         "time": sum(time_taken_per_episode) / len(time_taken_per_episode),
         "cost": sum(number_of_token_sent_per_episode) / 1000 * opt.prompt_token_price
         + sum(number_of_token_received_per_episode)

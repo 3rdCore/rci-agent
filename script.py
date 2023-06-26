@@ -5,7 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 import logging
 
-
+sys.path.append("computergym/")
 import main
 
 
@@ -26,6 +26,11 @@ def create_opt(models, task_names):
     setattr(opt, "models", models)
     setattr(opt, "task_names", task_names)
 
+    name = ""
+    results_dir = "/mnt/ui_copilot/results"
+    setattr(opt, "results_dir", results_dir)
+    setattr(opt, "name", name)
+
     # storing all the hyper-parameters and settings in a json file
     with open("arguments.json", "w") as f:
         json.dump(vars(opt), f)
@@ -33,7 +38,7 @@ def create_opt(models, task_names):
     return opt
 
 
-def save_model_results(df, model, name = "", path = ""):
+def save_model_results(df, model, name="", path=""):
     df_model = df.loc[df["model name"] == model]
     df_model = df_model.drop("model name", axis=1)
 
@@ -58,8 +63,6 @@ def save_model_results(df, model, name = "", path = ""):
 model_filename = "model_names.json"
 tasks_filename = "task_names.json"
 
-name = ""
-results_dir = ""
 
 with open(model_filename) as f:
     models = json.load(f)["model_name"]
@@ -126,13 +129,7 @@ for model in tqdm(models, desc="Models") if not flag else []:
 
         except Exception as e:
             with open("error_logs.txt", "a") as f:
-                f.write(
-                    "error in the task : "
-                    + task_name
-                    + " , exception : "
-                    + str(e)
-                    + "\n"
-                )
+                f.write("error in the task : " + task_name + " , exception : " + str(e) + "\n")
 
             df.loc[len(df)] = [model, task_name, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "error"]
 
