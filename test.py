@@ -17,7 +17,7 @@ openai = ChatOpenAI(
     model_name="gpt-4",
     **params,
     model_kwargs=open_ai_params,
-    openai_api_key="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",
+    openai_api_key="",
 )
 
 messages = [
