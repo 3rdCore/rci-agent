@@ -27,7 +27,7 @@ def create_opt(models, task_names):
     setattr(opt, "task_names", task_names)
 
     name = "sanity_check"
-    results_dir = "/mnt/ui_copilot/results/RCI/06_26_benchmark_sanity_check/"
+    results_dir = "/mnt/ui_copilot/results/RCI/06_28_benchmark_star_coder/"
     setattr(opt, "results_dir", results_dir)
     setattr(opt, "name", name)
 

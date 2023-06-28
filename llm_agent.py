@@ -14,6 +14,25 @@ import os
 import logging
 import tiktoken
 
+from langchain.prompts import (
+    ChatPromptTemplate,
+    PromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
+)
+
+from langchain import HuggingFacePipeline
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, AutoModelForSeq2SeqLM
+from langchain import PromptTemplate, HuggingFaceHub, LLMChain
+from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+
 from computergym.miniwob.miniwob_interface.action import (
     MiniWoBType,
     MiniWoBElementClickId,
@@ -465,14 +484,18 @@ class LLMAgent:
             try:
                 time.sleep(1)
 
-                messages = [
-                    SystemMessage(
-                        content="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
-                    ),
-                    HumanMessage(content=pt),
-                ]
+                template="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
+                pt = pt.replace("{", "{{") #todo : fix this 
+                pt = pt.replace("}", "}}") #todo : fix this
+                
+                system_message_prompt = SystemMessagePromptTemplate.from_template(template)
+                human_message_prompt = HumanMessagePromptTemplate.from_template(pt)
 
-                response = self.model(messages).content
+                chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
+
+                openai_chain = LLMChain(prompt=chat_prompt, llm=self.model)
+
+                response = openai_chain.run({})
 
             except Exception as e:
                 logging.error("OpenAI related error :", str(e))
