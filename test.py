@@ -3,7 +3,20 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, AutoModelForSeq2SeqLM
 from langchain import PromptTemplate, HuggingFaceHub, LLMChain
 from langchain.llms import OpenAI
-from langchain.chat_models import ChatOpenAI, SimpleChatModel
+from langchain.chat_models import ChatOpenAI
+
+from langchain.prompts import (
+    ChatPromptTemplate,
+    PromptTemplate,
+    SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
+)
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
 
 params = {"temperature": 0, "max_tokens": 256}
@@ -13,38 +26,42 @@ open_ai_params = {
     "presence_penalty": 0.0,
 }
 
-openai = ChatOpenAI(
+self.openai = ChatOpenAI(
     model_name="gpt-4",
     **params,
     model_kwargs=open_ai_params,
-    openai_api_key="",
+    openai_api_key="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",
 )
+template="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
+input_prompt = pt
 
 messages = [
     SystemMessage(
-        content="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
+        content=template
     ),
-    HumanMessage(content="Hello, how are you?"),
+    HumanMessage(content=input_prompt),
 ]
 
-response = openai(messages).content
+system_message_prompt = SystemMessagePromptTemplate.from_template(template)
+human_message_prompt = HumanMessagePromptTemplate.from_template(input_prompt)
+
+chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
+
+# get a chat completion from the formatted messages
+messages == chat_prompt.format_prompt().to_messages()
+
+openai_chain = LLMChain(prompt=chat_prompt, llm=openai)
+
+print(openai(messages).content)
+print("=-"*20)
+print(openai_chain.run({}))
+
 
 llm = HuggingFacePipeline.from_model_id(
     model_id="HuggingFaceH4/starchat-beta",
     task="text-generation",
-    model_kwargs={"temperature": 0, "max_length": 64},
-    #device = 0
-)
-
-template = """Question: {question}
-
-Answer: Let's think step by step."""
-prompt = PromptTemplate(template=template, input_variables=["question"])
-
-llm_chain = LLMChain(prompt=prompt, llm=llm)
-openai_chain = LLMChain(prompt=prompt, llm=openai)
-
-question = "Can you wrint a python program to print 'hello word' ?"
-
-print(llm_chain.run(question))
-print(openai_chain.run(question))
+    model_kwargs={"temperature": 0, "max_new_tokens": 64},
+    device = -1
+    )
+llm_chain = LLMChain(prompt=chat_prompt, llm=llm)
+print(llm_chain.run({}))
