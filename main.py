@@ -201,7 +201,7 @@ def miniwob(opt):
         model_id="HuggingFaceH4/starchat-beta",
         task="text-generation",
         model_kwargs={"temperature": 0, "max_new_tokens": 256},
-        #device = 0
+        device = 0
         )
     else:
         llm = ChatOpenAI(
