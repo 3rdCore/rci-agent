@@ -14,6 +14,7 @@ from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from langchain import HuggingFacePipeline
 
 import logging
 
@@ -199,7 +200,7 @@ def miniwob(opt):
         llm = HuggingFacePipeline.from_model_id(
         model_id="HuggingFaceH4/starchat-beta",
         task="text-generation",
-        model_kwargs={"temperature": 0, "max_length": 256},
+        model_kwargs={"temperature": 0, "max_new_tokens": 256},
         #device = 0
         )
     else:
