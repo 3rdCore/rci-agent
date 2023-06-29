@@ -155,6 +155,8 @@ def load_model(llm):
         model = "davinci"
     elif llm == "davinci2":
         model = "text-davinci-002"
+    elif llm == "starcoder":
+        model = "HuggingFaceH4/starchat-beta"
     else:
         raise NotImplemented
     return api_key, model
@@ -193,12 +195,20 @@ def miniwob(opt):
     "presence_penalty": 0.0,
     }
     
-    openai = ChatOpenAI(
-    model_name=model_name,
-    **params,
-    model_kwargs=open_ai_params,
-    openai_api_key= api_key,
-    )
+    if opt.llm  == "starcoder":
+        llm = HuggingFacePipeline.from_model_id(
+        model_id="HuggingFaceH4/starchat-beta",
+        task="text-generation",
+        model_kwargs={"temperature": 0, "max_length": 256},
+        #device = 0
+        )
+    else:
+        llm = ChatOpenAI(
+        model_name=model_name,
+        **params,
+        model_kwargs=open_ai_params,
+        openai_api_key= api_key,
+        )
 
     for _ in tqdm(range(opt.num_episodes), desc="Episodes", leave=False):
         logging.info(f"Episode: {_}" + "\n")
@@ -208,7 +218,7 @@ def miniwob(opt):
 
         llm_agent = LLMAgent(
             opt.env,
-            openai,
+            llm,
             rci_plan_loop=opt.erci,
             rci_limit=opt.irci,
             llm=opt.llm,
