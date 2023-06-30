@@ -14,7 +14,6 @@ from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from langchain import HuggingFacePipeline
 
 import logging
 
@@ -134,33 +133,7 @@ def get_webdriver(url):
     driver.implicitly_wait(10)
     return driver
 
-def load_model(llm):
-    """
-    Loads the model and the API key from the config.json file.
-    """
-    with open("config.json") as config_file:
-        api_key = json.load(config_file)["api_key"]
-    if llm == "chatgpt":
-        model = "gpt-3.5-turbo"
-    elif llm == "gpt4":
-        model = "gpt-4"
-    elif llm == "davinci":
-        model = "text-davinci-003"
-    elif llm == "ada":
-        model = "ada"
-    elif llm == "babbage":
-        model = "babbage"
-    elif llm == "curie":
-        model = "curie"
-    elif llm == "davinci1":
-        model = "davinci"
-    elif llm == "davinci2":
-        model = "text-davinci-002"
-    elif llm == "starcoder":
-        model = "HuggingFaceH4/starchat-beta"
-    else:
-        raise NotImplemented
-    return api_key, model
+
 
 def miniwob(opt):
     env = gym.make("MiniWoBEnv-v0", env_name=opt.env, headless=opt.headless)
@@ -187,29 +160,7 @@ def miniwob(opt):
         + time.strftime("%Y%m%d-%H%M%S")
     )
 
-    api_key, model_name = load_model(opt.llm)
 
-    params = {"temperature": 0, "max_tokens": 256}
-    open_ai_params = {
-    "top_p": 1,
-    "frequency_penalty": 0.0,
-    "presence_penalty": 0.0,
-    }
-    
-    if opt.llm  == "starcoder":
-        llm = HuggingFacePipeline.from_model_id(
-        model_id="HuggingFaceH4/starchat-beta",
-        task="text-generation",
-        model_kwargs={"temperature": 0, "max_new_tokens": 256},
-        device = 0
-        )
-    else:
-        llm = ChatOpenAI(
-        model_name=model_name,
-        **params,
-        model_kwargs=open_ai_params,
-        openai_api_key= api_key,
-        )
 
     for _ in tqdm(range(opt.num_episodes), desc="Episodes", leave=False):
         logging.info(f"Episode: {_}" + "\n")
@@ -219,7 +170,7 @@ def miniwob(opt):
 
         llm_agent = LLMAgent(
             opt.env,
-            llm,
+            opt.lang_model,
             rci_plan_loop=opt.erci,
             rci_limit=opt.irci,
             llm=opt.llm,

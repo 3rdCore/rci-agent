@@ -4,10 +4,39 @@ import sys
 import pandas as pd
 from tqdm import tqdm
 import logging
+import datetime
+from langchain import HuggingFacePipeline
 
 sys.path.append("computergym/")
 import main
 
+def load_model(llm):
+    """
+    Loads the model and the API key from the config.json file.
+    """
+    with open("config.json") as config_file:
+        api_key = json.load(config_file)["api_key"]
+    if llm == "chatgpt":
+        model = "gpt-3.5-turbo"
+    elif llm == "gpt4":
+        model = "gpt-4"
+    elif llm == "davinci":
+        model = "text-davinci-003"
+    elif llm == "ada":
+        model = "ada"
+    elif llm == "babbage":
+        model = "babbage"
+    elif llm == "curie":
+        model = "curie"
+    elif llm == "davinci1":
+        model = "davinci"
+    elif llm == "davinci2":
+        model = "text-davinci-002"
+    elif llm == "starcoder":
+        model = "HuggingFaceH4/starchat-beta"
+    else:
+        raise NotImplementedError("This method has not been implemented yet")    
+    return api_key, model
 
 def create_opt(models, task_names):
     opt = main.parse_opt()
@@ -24,10 +53,11 @@ def create_opt(models, task_names):
 
     # adding new fields to the opt object
     setattr(opt, "models", models)
-    setattr(opt, "task_names", task_names)
+    setattr(opt, "task_names copy", task_names)
 
     name = "sanity_check_starcoder"
-    results_dir = "/mnt/ui_copilot/results/RCI/06_28_benchmark_star_coder/"
+    current_date = datetime.date.today().strftime("%m_%d")
+    results_dir = f"/mnt/ui_copilot/results/RCI/{current_date}_benchmark_test_multi_gpu/"    
     setattr(opt, "results_dir", results_dir)
     setattr(opt, "name", name)
 
@@ -98,10 +128,39 @@ budget = 100  # budget in USD
 remaining_budget = budget
 flag = False
 
+
+
+params = {"temperature": 0, "max_tokens": 256}
+open_ai_params = {
+"top_p": 1,
+"frequency_penalty": 0.0,
+"presence_penalty": 0.0,
+}
+
+
+
 # running the main loop
 for model in tqdm(models, desc="Models") if not flag else []:
     print("Using model : ", model)
     opt.llm = model  # switch model
+    api_key, model_name = load_model(opt.llm)
+
+    if opt.llm  == "starcoder":
+        lang_model = HuggingFacePipeline.from_model_id(
+        model_id="HuggingFaceH4/starchat-beta",
+        task="text-generation",
+        model_kwargs={"temperature": 0, "max_length": 256, "device_map" : "auto"},
+        device = 0
+        )
+    else:
+        lang_model = ChatOpenAI(
+        model_name=model_name,
+        **params,
+        model_kwargs=open_ai_params,
+        openai_api_key= api_key,
+        )
+    setattr(opt, "lang_model", lang_model)
+
     for task_name in tqdm(task_names, desc="Tasks", leave=False) if not flag else []:
         opt.env = task_name  # switch task
         print("     Task addressed : ", opt.env, "\n")
