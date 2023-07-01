@@ -95,3 +95,18 @@ response =openai_chain.run({})
 end_time = time.time()
 inference_speed = len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(response)) / (end_time - start_time)
 print(f"Inference speed 4 GPUs: {inference_speed:.2f} tokens/second")
+
+'''
+import subprocess
+import os
+# Define the command to check for Chrome
+command = "where" if os.name == "nt" else "which"
+chrome_command = f"{command} google-chrome"
+
+# Run the command and check the output
+try:
+    subprocess.check_output(chrome_command.split())
+    print("Google Chrome is installed.")
+except subprocess.CalledProcessError:
+    print("Google Chrome is not installed.")
+'''

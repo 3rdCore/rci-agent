@@ -14,7 +14,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import chromedriver_binary  # update chromedriver binary path
+#import chromedriver_binary  # update chromedriver binary path
 
 from .fields import Fields, get_field_extractor
 from .state import MiniWoBState
