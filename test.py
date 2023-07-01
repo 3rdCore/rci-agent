@@ -4,7 +4,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, AutoMode
 from langchain import PromptTemplate, HuggingFaceHub, LLMChain
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
-
+import time
+import tiktoken
 from langchain.prompts import (
     ChatPromptTemplate,
     PromptTemplate,
@@ -26,14 +27,16 @@ open_ai_params = {
     "presence_penalty": 0.0,
 }
 
-self.openai = ChatOpenAI(
+openai = ChatOpenAI(
     model_name="gpt-4",
     **params,
     model_kwargs=open_ai_params,
-    openai_api_key="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",
+    openai_api_key="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",
 )
+
+
 template="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
-input_prompt = pt
+input_prompt = "Write a python code to print hello world"
 
 messages = [
     SystemMessage(
@@ -49,19 +52,46 @@ chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_mes
 
 # get a chat completion from the formatted messages
 messages == chat_prompt.format_prompt().to_messages()
-
 openai_chain = LLMChain(prompt=chat_prompt, llm=openai)
-
-print(openai(messages).content)
-print("=-"*20)
-print(openai_chain.run({}))
-
+start_time = time.time()
+response =openai_chain.run({})
+end_time = time.time()
+inference_speed = len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(response)) / (end_time - start_time)
+print(f"Inference speed 4 GPUs: {inference_speed:.2f} tokens/second")
+#openai_chain = LLMChain(prompt=chat_prompt, llm=openai)
+#print(openai_chain.run({}))
 
 llm = HuggingFacePipeline.from_model_id(
     model_id="HuggingFaceH4/starchat-beta",
     task="text-generation",
-    model_kwargs={"temperature": 0, "max_new_tokens": 64},
+    model_kwargs={"temperature": 0, "max_length": 256, "device_map" : "auto"},
+    )
+llm_chain = LLMChain(prompt=chat_prompt, llm=llm)
+
+start_time = time.time()
+response =llm_chain.run({})
+end_time = time.time()
+inference_speed = len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(response)) / (end_time - start_time)
+print(f"Inference speed 4 GPUs: {inference_speed:.2f} tokens/second")
+
+llm = HuggingFacePipeline.from_model_id(
+    model_id="HuggingFaceH4/starchat-beta",
+    task="text-generation",
+    model_kwargs={"temperature": 0, "max_length": 256},
     device = -1
     )
 llm_chain = LLMChain(prompt=chat_prompt, llm=llm)
-print(llm_chain.run({}))
+
+start_time = time.time()
+response =llm_chain.run({})
+end_time = time.time()
+inference_speed = len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(response)) / (end_time - start_time)
+print(f"Inference speed single CPU: {inference_speed:.2f} tokens/second")
+
+
+openai_chain = LLMChain(prompt=chat_prompt, llm=openai)
+start_time = time.time()
+response =openai_chain.run({})
+end_time = time.time()
+inference_speed = len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(response)) / (end_time - start_time)
+print(f"Inference speed 4 GPUs: {inference_speed:.2f} tokens/second")
