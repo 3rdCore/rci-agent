@@ -55,10 +55,15 @@ def count_tokens(text, model):
         "davinci1": "davinci",
         "davinci2": "text-davinci-002",
     }
-    try :
-        enc = tiktoken.encoding_for_model(model_map.get(model))
-    except :
+
+    if model == 'starcoder':
         enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    else:
+        try :
+            enc = tiktoken.encoding_for_model(model_map.get(model))
+        except :
+            enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    
     
     return len(enc.encode(text))
 

@@ -149,8 +149,7 @@ for model in tqdm(models, desc="Models") if not flag else []:
         lang_model = HuggingFacePipeline.from_model_id(
         model_id="HuggingFaceH4/starchat-beta",
         task="text-generation",
-        model_kwargs={"temperature": 0, "max_length": 256, "device_map" : "auto"},
-        device = 0
+        model_kwargs={"temperature": 0, "max_length": 256, "device_map" : "auto"}
         )
     else:
         lang_model = ChatOpenAI(
