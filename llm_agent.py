@@ -47,6 +47,7 @@ import re
 def count_tokens(text, model):
     model_map = {
         "chatgpt": "gpt-3.5-turbo",
+        "starcoder": "gpt-3.5-turbo",
         "gpt4": "gpt-4",
         "davinci": "text-davinci-003",
         "ada": "ada",
@@ -55,15 +56,10 @@ def count_tokens(text, model):
         "davinci1": "davinci",
         "davinci2": "text-davinci-002",
     }
-
-    if model == 'starcoder':
+    try :
+        enc = tiktoken.encoding_for_model(model_map.get(model))
+    except :
         enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
-    else:
-        try :
-            enc = tiktoken.encoding_for_model(model_map.get(model))
-        except :
-            enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
-    
     
     return len(enc.encode(text))
 
