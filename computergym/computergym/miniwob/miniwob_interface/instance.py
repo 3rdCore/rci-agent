@@ -14,8 +14,16 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-#import chromedriver_binary  # update chromedriver binary path
+import subprocess
+# Define the command to check for Chrome
+command = "where" if os.name == "nt" else "which"
+chrome_command = f"{command} google-chrome"
 
+try: 
+    subprocess.check_output(chrome_command.split())
+    import chromedriver_binary
+except subprocess.CalledProcessError:
+    pass    
 from .fields import Fields, get_field_extractor
 from .state import MiniWoBState
 from .reward import get_original_reward
