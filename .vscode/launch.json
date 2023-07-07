@@ -4,14 +4,13 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "Python: Debug Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
             "cwd": "${workspaceFolder}",
             "args": []
         },
@@ -34,7 +33,7 @@
                 "1",
                 "--sgrounding",
             ]
-        }, 
+        },
         {
             "name": "Python: script.py ",
             "type": "python",
