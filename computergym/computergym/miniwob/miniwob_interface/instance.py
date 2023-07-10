@@ -23,7 +23,7 @@ try:
     subprocess.check_output(chrome_command.split())
     import chromedriver_binary
 except subprocess.CalledProcessError:
-    pass    
+    pass
 from .fields import Fields, get_field_extractor
 from .state import MiniWoBState
 from .reward import get_original_reward
