@@ -48,3 +48,11 @@ dist/**
 *.xlf
 package.nls.*.json
 l10n/
+config.json
+*.xlsx
+computergym/**/*.json
+results_*.json
+logs.txt
+test_*
+docker/*
+arguments.json

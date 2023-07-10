@@ -6,9 +6,7 @@ class Prompt:
         self.llm = "davinci"
         self.davinci_type_regex = "^type\s.{1,}$"
         self.chatgpt_type_regex = '^type\s[^"]{1,}$'
-        self.press_regex = (
-            "^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$"
-        )
+        self.press_regex = "^press\s(enter|arrowleft|arrowright|arrowup|arrowdown|backspace)$"
         self.clickxpath_regex = "^clickxpath\s.{1,}$"
         self.clickoption_regex = "^clickoption\s.{1,}$"
         self.movemouse_regex = "^movemouse\s.{1,}$"
@@ -19,7 +17,7 @@ class Prompt:
             base_dir = f"prompt/"
 
         with open(base_dir + "example.txt") as f:
-            self.example_prompt = f.read()
+            self.example_prompt = ""    #f.read()
 
         with open(base_dir + "first_action.txt") as f:
             self.first_action_prompt = f.read()
@@ -55,3 +53,13 @@ class Prompt:
         base_prompt = base_prompt.replace("{movemouse}", self.movemouse_regex)
 
         return base_prompt
+
+    def get_reverse_dict(self):
+        prompt_texts = {}
+
+        for attr_name in dir(self):
+            attr_value = getattr(self, attr_name)
+            if isinstance(attr_value, str) and len(attr_value) > 0:
+                prompt_texts[attr_value] = "[" + attr_name.upper() + "]"
+
+        return prompt_texts

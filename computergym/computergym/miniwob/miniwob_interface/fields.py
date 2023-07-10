@@ -16,7 +16,7 @@ def get_field_extractor(task_name):
     except KeyError:
 
         def extractor(utterance):
-            raise ValueError("{} does not have a field extractor.".format(task_name))
+            raise ValueError("{} : Task unknown.".format(task_name))
 
         return extractor
 

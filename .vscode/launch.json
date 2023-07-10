@@ -1,0 +1,51 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Debug Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+            "args": []
+        },
+        {
+            "name": "Python : debug main.py",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "--env",
+                "click-dialog",
+                "--llm",
+                "chatgpt",
+                "--num-episodes",
+                "5",
+                "--irci",
+                "1",
+                "--sgrounding",
+            ]
+        },
+        {
+            "name": "Python: script.py ",
+            "type": "python",
+            "request": "launch",
+            "program": "script.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/computergym"
+            },
+            "args": []
+        }
+    ]
+}

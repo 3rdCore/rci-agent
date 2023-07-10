@@ -16,6 +16,8 @@ The RCI agent is implemented in Python 3.9 and requires the following dependenci
 * selenium
 * Pillow
 * regex
+* openpyxl
+* tiktoken
 
 ```sh
 pip install -r requirements.txt
@@ -29,7 +31,18 @@ To run the code, you must first install MiniWoB++ and configure your OpenAI API 
 cd computergym
 pip install -e .
 ```
-Once that's done, you need to write your OpenAI API key in the `example_config.json` file, then rename the file to `config.json`
+Then, make sure that you have a browser installed on your machine by running the following command : 
+```sh
+which google-chrome
+```
+
+If you don't have a browser installed, we recommend Google Chrome or Chromium. You can install it by running the following command:
+
+```sh
+sudo apt-get install google-chrome-stable
+```
+
+Once that's done, you need to write your OpenAI API key in the `example/example_config.json` file, then rename the file to `config.json`. 
 
 ### Run
 To run the code, simply execute the following command:
@@ -67,15 +80,26 @@ Consider running the following command to verify if everything is functioning co
 python main.py --env choose-list --llm chatgpt --num-episodes 1 --irci 1 --sgrounding
 ```
 
-## Evaluation
+## Run the benchmark :
 Our project's approach has yielded impressive results, with our agent achieving the second-highest score out of all tested models. We have observed that our agent outperforms the baselines, with the exception of CC-Net (SL + RL), which uses dictionary-based typing actions.
 
 ![](/artifacts/baseline-1.png)
 
 What sets our RCI agent apart is that it accomplished this feat using 120 times fewer samples than WebN-T5-3B and 11,000 times fewer samples than CC-Net. Obtaining expert demonstrations and defining reward functions for computer tasks can be a daunting challenge, but our research highlights the potential of using LLMs to overcome these obstacles and achieve success in general computer tasks.
 
-![](/artifacts/demos-1.png)
+In order to run the benchmark, you need to create 2 json files :
+- `task_names.json`, `{"task_name": ["task1", "task2", ...]}` : List of task to run.
+- `model_names.json`, `{"model_name": ["model1", "model2", ...]}` : list of LLM to evaluate (gpt4, chatgpt, davinci, ada, ...)
 
+Or you can also use the provided template in `/example`and rename them accordingly. You can modify the hyperparameters directly in the file `script.py` and set the maximum Openai budget for the benchmark.
+
+Finally, you need to run the following command:
+```python
+python script.py
+```
+
+FOr each model, the benchmark results are savec in `results_<model> .xlsx` and `results_<model>.csv`.
+For each task, the history of inputs/outputs of the LLM are stored in the folder `/history`.
 ## Check out our paper! 
 
 Our paper is available on [Arxiv](https://arxiv.org/abs/2303.17491v1). If you use this code in your research, we kindly ask that you cite our paper.

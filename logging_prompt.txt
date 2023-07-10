@@ -1,0 +1,13 @@
+We are working on a project where we aim to solve a task on a web browser using natural language. Each episode represent one attempt to solve the given task. To achieve this, we generate Selenium commands using a language model that takes as input the accessible HTML code of the webpage. After running this method on the 104 tasks of the MiniWOB++ benchmark, we found that the current method failed at some of them. Therefore, we want to automate the errors analysis process to highlight the limitations of the current approach. For this, we plan to use another language model to process the log file and undertstand the reason why the model failed at inference.
+
+To do this, we examine the query and response of the language model, as well as potential error messages that could have been triggered due to reasons such as the model being unreachable or the natural language answer not being translatable into a Selenium command. All of this information is stored in a log file containing all the input and output of the language model for each task. 
+
+However this raw log file is too long and can't be processed as it by a LLM as it contains more tokens than permitted by the context lenght of most SotA LLM. To solve this issue, we propose to compress the original log textfile in a smaller one that would still contains all the usefull information. 
+
+To shorten this file, we combined different method : 
+
+1) We created a dictionary that contains as keys all the redundant paragraph that are periodically used in input prompt of the LLM. So that instead of storing the full paragraph in the log file, we only store the value associated with each declared paragraphs in the dictionary. Don't forget that this compression method is only used to reduce the size of the log file but that the model is still given the full paragraph as input.   
+
+Also instead of storing the full html code of the webpage obtained after performing the action on the browser, we only store the difference between the html code before and after the action using the gitHub Code review format at each step of the episode. 
+
+Here is the dictionary :

@@ -7,13 +7,23 @@ import urllib.parse as urlparse
 from threading import Thread
 
 import numpy as np
+import os
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import subprocess
+# Define the command to check for Chrome
+command = "where" if os.name == "nt" else "which"
+chrome_command = f"{command} google-chrome"
 
+try: 
+    subprocess.check_output(chrome_command.split())
+    import chromedriver_binary
+except subprocess.CalledProcessError:
+    pass
 from .fields import Fields, get_field_extractor
 from .state import MiniWoBState
 from .reward import get_original_reward
@@ -161,8 +171,9 @@ class MiniWoBInstance(Thread):
             self.index
         )
         options = webdriver.ChromeOptions()
+        chromedriver_path_WSL = "/usr/local/bin/chromedriver"
         if self.headless:
-            options.add_argument("headless")
+            options.add_argument("--headless=new")
             options.add_argument("disable-gpu")
             options.add_argument("no-sandbox")
         else:
@@ -175,7 +186,15 @@ class MiniWoBInstance(Thread):
                     9000, 30 + self.index * (self.window_height + 30)
                 )
             )
-        self.driver = webdriver.Chrome(chrome_options=options)
+
+        # overwrite default chrome driver path for WSL
+        if "WSL_DISTRO_NAME" in os.environ:
+            self.driver = webdriver.Chrome(
+                chromedriver_path_WSL, options=options
+            ) #chrome_options=options for Chrome instead of Chromium
+        else:
+            self.driver = webdriver.Chrome(options=options) #chrome_options=options for Chrome instead of Chromium
+
         self.driver.implicitly_wait(5)
 
         """
@@ -196,7 +215,9 @@ class MiniWoBInstance(Thread):
                 EC.element_to_be_clickable((By.ID, self.SYNC_SCREEN_ID))
             )
         except TimeoutException as e:
-            logging.error("Page did not load properly. Wrong MINIWOB_BASE_URL?")
+            logging.error(
+                "Page did not load properly. Wrong MINIWOB_BASE_URL or unknown task ?"
+            )
             raise e
         # Seed the seed
         self.driver.execute_script("Math.seedrandom({});".format(self.init_seed))
