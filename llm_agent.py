@@ -14,6 +14,25 @@ import os
 import logging
 import tiktoken
 
+from langchain.prompts import (
+    ChatPromptTemplate,
+    PromptTemplate,
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
+)
+
+from langchain import HuggingFacePipeline
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, AutoModelForSeq2SeqLM
+from langchain import PromptTemplate, HuggingFaceHub, LLMChain
+from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+
 from computergym.miniwob.miniwob_interface.action import (
     MiniWoBType,
     MiniWoBElementClickId,
@@ -28,6 +47,7 @@ import re
 def count_tokens(text, model):
     model_map = {
         "chatgpt": "gpt-3.5-turbo",
+        "starcoder": "gpt-3.5-turbo",
         "gpt4": "gpt-4",
         "davinci": "text-davinci-003",
         "ada": "ada",
@@ -36,8 +56,11 @@ def count_tokens(text, model):
         "davinci1": "davinci",
         "davinci2": "text-davinci-002",
     }
-
-    enc = tiktoken.encoding_for_model(model_map.get(model))
+    try :
+        enc = tiktoken.encoding_for_model(model_map.get(model))
+    except :
+        enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    
     return len(enc.encode(text))
 
 
@@ -161,6 +184,7 @@ class LLMAgent:
     def __init__(
         self,
         env: str,
+        model,
         rci_plan_loop: int = 1,
         rci_limit: int = 1,
         llm="chatgpt",
@@ -171,10 +195,10 @@ class LLMAgent:
         self.rci_limit = rci_limit
         self.rci_plan_loop = rci_plan_loop
         self.llm = llm
+        self.model = model
         self.prompt = Prompt(env=env)
         self.state_grounding = state_grounding
         self.api_key = ""
-        self.load_model()
         self.number_of_token_sent = 0
         self.number_of_token_received = 0
         self.number_of_calls = 0
@@ -200,32 +224,6 @@ class LLMAgent:
             f"{self.history_name}_compressed.txt",
         )
         self.writer = TextFileWriter(filename, self.prompt)
-
-    def load_model(self):
-        """
-        Loads the model and the API key from the config.json file.
-        """
-        with open("config.json") as config_file:
-            api_key = json.load(config_file)["api_key"]
-            self.api_key = api_key
-        if self.llm == "chatgpt":
-            self.model = "gpt-3.5-turbo"
-        elif self.llm == "gpt4":
-            self.model = "gpt-4"
-        elif self.llm == "davinci":
-            self.model = "text-davinci-003"
-        elif self.llm == "ada":
-            self.model = "ada"
-        elif self.llm == "babbage":
-            self.model = "babbage"
-        elif self.llm == "curie":
-            self.model = "curie"
-        elif self.llm == "davinci1":
-            self.model = "davinci"
-        elif self.llm == "davinci2":
-            self.model = "text-davinci-002"
-        else:
-            raise NotImplemented
 
     def save_task(self):
         """
@@ -487,28 +485,18 @@ class LLMAgent:
             try:
                 time.sleep(1)
 
-                params = {"temperature": 0, "max_tokens": 256}
-                open_ai_params = {
-                    "top_p": 1,
-                    "frequency_penalty": 0.0,
-                    "presence_penalty": 0.0,
-                }
+                template="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
+                pt = pt.replace("{", "{{") #todo : fix this 
+                pt = pt.replace("}", "}}") #todo : fix this
+                
+                system_message_prompt = SystemMessagePromptTemplate.from_template(template)
+                human_message_prompt = HumanMessagePromptTemplate.from_template(pt)
 
-                openai = ChatOpenAI(
-                    model_name=self.model,
-                    **params,
-                    model_kwargs=open_ai_params,
-                    openai_api_key=self.api_key,
-                )
+                chat_prompt = ChatPromptTemplate.from_messages([system_message_prompt, human_message_prompt])
 
-                messages = [
-                    SystemMessage(
-                        content="You are an autoregressive language model that completes user's sentences. You should not conversate with user."
-                    ),
-                    HumanMessage(content=pt),
-                ]
+                openai_chain = LLMChain(prompt=chat_prompt, llm=self.model)
 
-                response = openai(messages).content
+                response = openai_chain.run({})
 
             except Exception as e:
                 logging.error("OpenAI related error :", str(e))

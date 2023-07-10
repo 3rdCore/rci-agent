@@ -2,6 +2,9 @@ import argparse
 import random
 import time
 import os
+import json
+
+from langchain.chat_models import ChatOpenAI
 
 import computergym
 import gym
@@ -131,6 +134,7 @@ def get_webdriver(url):
     return driver
 
 
+
 def miniwob(opt):
     env = gym.make("MiniWoBEnv-v0", env_name=opt.env, headless=opt.headless)
     time.sleep(10)  # wait for the env to load
@@ -156,6 +160,8 @@ def miniwob(opt):
         + time.strftime("%Y%m%d-%H%M%S")
     )
 
+
+
     for _ in tqdm(range(opt.num_episodes), desc="Episodes", leave=False):
         logging.info(f"Episode: {_}" + "\n")
 
@@ -164,6 +170,7 @@ def miniwob(opt):
 
         llm_agent = LLMAgent(
             opt.env,
+            opt.lang_model,
             rci_plan_loop=opt.erci,
             rci_limit=opt.irci,
             llm=opt.llm,

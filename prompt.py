@@ -17,7 +17,7 @@ class Prompt:
             base_dir = f"prompt/"
 
         with open(base_dir + "example.txt") as f:
-            self.example_prompt = f.read()
+            self.example_prompt = ""    #f.read()
 
         with open(base_dir + "first_action.txt") as f:
             self.first_action_prompt = f.read()
